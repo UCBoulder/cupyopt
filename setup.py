@@ -11,7 +11,7 @@ README = (HERE / "README.rst").read_text()
 setuptools.setup(
     name="cupyopt",
     version="0.0.1",
-    description="CU Python Opionated Prefect Tasks",
+    description="CU Python Opinionated Prefect Tasks",
     long_description=README,
     long_description_content_type="text/x-rst",
     author="CU Boulder, OIT",
