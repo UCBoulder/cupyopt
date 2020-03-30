@@ -1,0 +1,11 @@
+nose
+pandas
+pysftp
+sphinx
+sphinx_rtd_theme
+pygrok
+prefect
+sqlalchemy
+cx_Oracle
+pyarrow
+pandera
