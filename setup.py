@@ -21,6 +21,7 @@ setuptools.setup(
         'License :: OSI Approved :: Apache Software License',
         'Operating System :: OS Independent',
     ],
-    packages=setuptools.find_packages(),
+    packages=find_packages(where='src'),
     python_requires=">=3.6",
+    package_dir={"": "src"},
 )
