@@ -1,4 +1,3 @@
-# +
 import pandas as pd
 import datetime
 import logging
@@ -14,15 +13,13 @@ from sqlalchemy import types, create_engine
 from prefect import Task
 from box import Box
 
-
-# -
-
 class ORADBGetEngine(Task):
     """
     Configure an sqlalchemy engine with cx_Oracle
     
     Return a sqlalchemy engine
-    """    
+    """   
+    
     def __init__(self, **kwargs: Any):
         super().__init__(**kwargs)
 
@@ -76,4 +73,44 @@ class ORADBGetEngine(Task):
 
             return engine
 
+class ORADBSelectToDataFrame(Task):
+    """
+    Runs select statement against database using SQLAlchemy engine.
+    
+    Return a Pandas DataFrame with data collected from SQL statement. 
+    """
 
+    def __init__(self, **kwargs: Any):
+        super().__init__(**kwargs)
+
+    def run(
+        self,
+        select_stmt: str,
+        engine: sqlalchemy.engine.base.Engine,
+        index_col=None,
+        coerce_float=True,
+        params=None,
+        parse_dates=None,
+        columns=None,
+        chunksize=None,
+        **format_kwargs: Any
+    ) -> pd.DataFrame:
+        
+        with prefect.context(**format_kwargs) as data:
+
+            self.logger.info(
+                "Running select statement using SQLAlchemy engine to Pandas DataFrame."
+            )
+
+            df = pd.read_sql(
+                sql=select_stmt,
+                con=engine,
+                index_col=index_col,
+                coerce_float=coerce_float,
+                params=params,
+                parse_dates=parse_dates,
+                columns=columns,
+                chunksize=chunksize,
+            )
+
+        return df
