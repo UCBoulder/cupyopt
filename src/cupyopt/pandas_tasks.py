@@ -29,7 +29,7 @@ class PdBoxedDataFrameToCSV(Task):
         self.header = header
         super().__init__(**kwargs)
 
-    @defaults_from_attrs("dataframe", "config_box" "index", "header")
+    @defaults_from_attrs("dataframe", "config_box", "index", "header")
     def run(
         self,
         dataframe: Box,

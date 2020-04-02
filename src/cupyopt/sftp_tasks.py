@@ -111,7 +111,7 @@ class SFTPPutFromFilepathsBox(Task):
             with pysftp.Connection(
                 host=hostname, username=username, private_key=key_file, cnopts=cnopts
             ) as sftp:
-                sftp.makedirs(tempfolderpath)
+                #sftp.makedirs(tempfolderpath)
                 with sftp.cd(remoterootpath):
                     for name, filepath in filepaths.items():
                         localtmpfile = os.path.join(tempfolderpath, name)
