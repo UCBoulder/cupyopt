@@ -8,10 +8,10 @@ HERE = pathlib.Path(__file__).parent
 README = (HERE / "README.rst").read_text()
  
 # Pull requirements from the text file
-requirementPath = (HERE / 'requirements.txt')
+requirement_path = (HERE / 'requirements.txt')
 install_requires = []
-if os.path.isfile(requirementPath):
-    with open(requirementPath) as f:
+if os.path.isfile(requirement_path):
+    with open(requirement_path) as f:
         install_requires = f.read().splitlines()
  
 # This call to setup() does all the work
