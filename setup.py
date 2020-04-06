@@ -1,11 +1,18 @@
 import pathlib
-import setuptools
+import setuptools, os
  
 # The directory containing this file
 HERE = pathlib.Path(__file__).parent
  
 # The text of the README file
 README = (HERE / "README.rst").read_text()
+ 
+# Pull requirements from the text file
+requirementPath = HERE + '/requirements.txt'
+install_requires = []
+if os.path.isfile(requirementPath):
+    with open(requirementPath) as f:
+        install_requires = f.read().splitlines()
  
 # This call to setup() does all the work
 setuptools.setup(
@@ -24,4 +31,5 @@ setuptools.setup(
     packages=setuptools.find_packages(where='src'),
     python_requires=">=3.6",
     package_dir={"": "src"},
+    install_requires=install_requires,
 )
