@@ -60,7 +60,6 @@ class SFTPPut(Task):
             localtmpfile = os.path.join(tempfolderpath, workfile)
             self.logger.debug("Working on ", localtmpfile)
 
-            # Pick out the oldest file in the dataframe
             with pysftp.Connection(
                 host=hostname, username=username, private_key=key_file, cnopts=cnopts
             ) as sftp:
@@ -68,9 +67,7 @@ class SFTPPut(Task):
                 with sftp.cd(remoterootpath):
                     sftp.put(workfile, preserve_mtime=False)
 
-            # Read the file into a dataframe
             self.logger.info("SFTPPut {}".format(localtmpfile))
-            return localtmpfile 
 
 class SFTPPutFromFilepathsBox(Task):
     """
