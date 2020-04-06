@@ -49,7 +49,7 @@ class SFTPPut(Task):
     def __init__(self, **kwargs: Any):
         super().__init__(**kwargs)
 
-    def run(self, workfile: str, config_box: Box, cnopts: pysftp.CnOpts, tempfolderpath: str, **format_kwargs: Any):    
+    def run(self, workfile: str, config_box: Box, cnopts: pysftp.CnOpts, **format_kwargs: Any):    
         with prefect.context(**format_kwargs) as data:
             
             key_file = config_box["private_key_path"]
@@ -57,17 +57,13 @@ class SFTPPut(Task):
             username = config_box["username"]
             remoterootpath = config_box["target_dir"]
 
-            localtmpfile = os.path.join(tempfolderpath, workfile)
-            self.logger.debug("Working on ", localtmpfile)
-
             with pysftp.Connection(
                 host=hostname, username=username, private_key=key_file, cnopts=cnopts
             ) as sftp:
-                sftp.makedirs(tempfolderpath)
                 with sftp.cd(remoterootpath):
                     sftp.put(workfile, preserve_mtime=False)
 
-            self.logger.info("SFTPPut {}".format(localtmpfile))
+            self.logger.info("SFTPPut {}".format(workfile))
 
 class SFTPPutFromFilepathsBox(Task):
     """
