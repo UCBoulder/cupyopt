@@ -9,3 +9,5 @@ sqlalchemy
 cx_Oracle
 pyarrow
 pandera
+sqlalchemy
+cx_Oracle
