@@ -22,13 +22,13 @@ class ORADBGetEngine(Task):
     Return a sqlalchemy engine
     """
 
-    def __init__(self, config_box: Box, is_sid=False, **kwargs: Any):
+    def __init__(self, config_box: Box = None, is_sid=False = None, **kwargs: Any):
         self.config_box = config_box
         self.is_sid = is_sid
         super().__init__(**kwargs)
 
     @defaults_from_attrs("config_box", "is_sid")
-    def run(self, config_box: Box, is_sid=False, **format_kwargs: Any) -> str:
+    def run(self, config_box: Box = None, is_sid=False = None, **format_kwargs: Any) -> str:
         with prefect.context(**format_kwargs) as data:
 
             if not type(config_box) == Box:
