@@ -8,7 +8,7 @@ HERE = pathlib.Path(__file__).parent
 README = (HERE / "README.rst").read_text()
  
 # Pull requirements from the text file
-requirementPath = HERE + '/requirements.txt'
+requirementPath = (HERE / 'requirements.txt')
 install_requires = []
 if os.path.isfile(requirementPath):
     with open(requirementPath) as f:
