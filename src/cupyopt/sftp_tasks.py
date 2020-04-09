@@ -65,55 +65,6 @@ class SFTPPut(Task):
 
             self.logger.info("SFTPPut {}".format(workfile))
 
-class SFTPPutFromFilepathsBox(Task):
-    """
-    Put a files on the FTP server based on a filepaths Box
-    """
-
-    def __init__(
-        self,
-        filepaths: Box,
-        config_box: Box,
-        cnopts: pysftp.CnOpts,
-        tempfolderpath: str,
-        **kwargs: Any
-    ):
-        self.filepaths = filepaths
-        self.config_box = config_box
-        self.cnopts = cnopts
-        self.tempfolderpath = tempfolderpath
-        super().__init__(**kwargs)
-
-    @defaults_from_attrs("filepaths", "config_box", "cnopts", "tempfolderpath")
-    def run(
-        self,
-        filepaths: Box,
-        config_box: Box,
-        cnopts: pysftp.CnOpts,
-        tempfolderpath: str,
-        **format_kwargs: Any
-    ):
-        with prefect.context(**format_kwargs) as data:
-
-            key_file = config_box["private_key_path"]
-            hostname = config_box["hostname"]
-            username = config_box["username"]
-            remoterootpath = config_box["target_dir"]
-
-            # Pick out the oldest file in the dataframe
-            with pysftp.Connection(
-                host=hostname, username=username, private_key=key_file, cnopts=cnopts
-            ) as sftp:
-                #sftp.makedirs(tempfolderpath)
-                with sftp.cd(remoterootpath):
-                    for name, filepath in filepaths.items():
-                        localtmpfile = os.path.join(tempfolderpath, name)
-                        self.logger.debug("Working on ", localtmpfile)
-                        sftp.put(filepath, preserve_mtime=False)
-                        self.logger.info("SFTPPut {}".format(localtmpfile))
-
-            return localtmpfile
-
 class SFTPRemove(Task):
     """
     Remove file from the FTP server

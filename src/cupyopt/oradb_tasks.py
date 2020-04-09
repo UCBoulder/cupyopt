@@ -28,7 +28,9 @@ class ORADBGetEngine(Task):
         super().__init__(**kwargs)
 
     @defaults_from_attrs("config_box", "is_sid")
-    def run(self, config_box: Box = None, is_sid: bool = None, **format_kwargs: Any) -> str:
+    def run(
+        self, config_box: Box = None, is_sid: bool = None, **format_kwargs: Any
+    ) -> str:
         with prefect.context(**format_kwargs) as data:
 
             if not type(config_box) == Box:
@@ -94,46 +96,19 @@ class ORADBSelectToDataFrame(Task):
 
     def __init__(
         self,
-        select_stmt: str,
-        engine: sqlalchemy.engine.base.Engine,
-        index_col=None,
-        coerce_float=True,
-        params=None,
-        parse_dates=None,
-        columns=None,
-        chunksize=None,
+        select_stmt: str = None,
+        engine: sqlalchemy.engine.base.Engine = None,
         **kwargs: Any
     ):
         self.select_stmt = select_stmt
         self.engine = engine
-        self.index_col = index_col
-        self.coerce_float = coerce_float
-        self.params = params
-        self.parse_dates = parse_dates
-        self.columns = columns
-        self.chunksize = chunksize
         super().__init__(**kwargs)
 
-    @defaults_from_attrs(
-        "select_stmt",
-        "engine",
-        "index_col",
-        "coerce_float",
-        "params",
-        "parse_dates",
-        "columns",
-        "chunksize",
-    )
+    @defaults_from_attrs("select_stmt", "engine")
     def run(
         self,
-        select_stmt: str,
-        engine: sqlalchemy.engine.base.Engine,
-        index_col=None,
-        coerce_float=True,
-        params=None,
-        parse_dates=None,
-        columns=None,
-        chunksize=None,
+        select_stmt: str = None,
+        engine: sqlalchemy.engine.base.Engine = None,
         **format_kwargs: Any
     ) -> pd.DataFrame:
 
@@ -143,95 +118,6 @@ class ORADBSelectToDataFrame(Task):
                 "Running select statement using SQLAlchemy engine to Pandas DataFrame."
             )
 
-            df = pd.read_sql(
-                sql=select_stmt,
-                con=engine,
-                index_col=index_col,
-                coerce_float=coerce_float,
-                params=params,
-                parse_dates=parse_dates,
-                columns=columns,
-                chunksize=chunksize,
-            )
+            df = pd.read_sql(sql=select_stmt, con=engine)
 
         return df
-
-
-class ORADBSelectToBoxedDataFrame(Task):
-    """
-    Runs select statement against database using SQLAlchemy engine.
-    
-    Return a Box containing a Pandas DataFrame with data collected from SQL statement. 
-    """
-
-    def __init__(
-        self,
-        config_box: Box,
-        engine: sqlalchemy.engine.base.Engine,
-        index_col=None,
-        coerce_float=True,
-        params=None,
-        parse_dates=None,
-        columns=None,
-        chunksize=None,
-        **kwargs: Any
-    ):
-        self.config_box = config_box
-        self.engine = engine
-        self.index_col = index_col
-        self.coerce_float = coerce_float
-        self.params = params
-        self.parse_dates = parse_dates
-        self.columns = columns
-        self.chunksize = chunksize
-        super().__init__(**kwargs)
-
-    @defaults_from_attrs(
-        "config_box",
-        "engine",
-        "index_col",
-        "coerce_float",
-        "params",
-        "parse_dates",
-        "columns",
-        "chunksize",
-    )
-    def run(
-        self,
-        config_box: Box,
-        engine: sqlalchemy.engine.base.Engine,
-        index_col=None,
-        coerce_float=True,
-        params=None,
-        parse_dates=None,
-        columns=None,
-        chunksize=None,
-        **format_kwargs: Any
-    ) -> Box:
-
-        with prefect.context(**format_kwargs) as data:
-
-            result_box = Box()
-            """
-            Expect the format of the config_box for this task to be as follows:
-            {dataframe_name: select_query}
-            """
-            for name, query in config_box.items():
-                self.logger.info(
-                    "Running select statement using SQLAlchemy engine to Boxed Pandas DataFrame for dataframe: {}.".format(
-                        name
-                    )
-                )
-                df = pd.read_sql(
-                    sql=query,
-                    con=engine,
-                    index_col=index_col,
-                    coerce_float=coerce_float,
-                    params=params,
-                    parse_dates=parse_dates,
-                    columns=columns,
-                    chunksize=chunksize,
-                )
-                result_box += {"dataframe": {name: df}}
-
-        return result_box
