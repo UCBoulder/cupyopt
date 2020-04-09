@@ -83,49 +83,6 @@ class PdDataFrameToCSV(Task):
             return filepath
 
 
-class PdBoxedDataFrameToCSV(Task):
-    """
-    Exports boxed dataframes using temporary dicectory and names from a Dataframe Box
-    
-    Return a Box containing filepaths for each Dataframe
-    """
-
-    def __init__(
-        self,
-        dataframe: Box = None,
-        df_name_suffix: str = None,
-        config_box: Box = None,
-        index=False,
-        header=True,
-        **kwargs: Any
-    ):
-        self.dataframe = dataframe
-        self.config_box = config_box
-        self.index = index
-        self.header = header
-        super().__init__(**kwargs)
-
-    @defaults_from_attrs("dataframe", "df_name_suffix", "config_box", "index", "header")
-    def run(
-        self,
-        dataframe: Box = None,
-        df_name_suffix: str = None,
-        config_box: Box = None,
-        index=True,
-        header=True,
-        **format_kwargs: Any
-    ) -> Box:
-        with prefect.context(**format_kwargs) as data:
-
-            filepaths = Box()
-            for name, df in dataframe.dataframe.items():
-                filepath = config_box.extracttempdir + "/" + name + ".csv"
-                filepaths += {name: filepath}
-                df.to_csv(filepath, index=index, header=header)
-
-            return filepaths
-
-
 class PdDatadictTranslate(Task):
     """
     Transforms dataframes to pre-specified formats found in custom Pandas Dataframe data-dictionary content.
