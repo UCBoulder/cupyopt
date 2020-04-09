@@ -13,6 +13,76 @@ from box import Box
 import pandera as pa
 
 
+class PdDataFrameFromCSV(Task):
+    """
+    Read CSV into a Pandas DataFrame
+    
+    Return a Pandas DataFrame
+    """
+
+    def __init__(self, filepath: str = None, **kwargs: Any):
+        self.filepath = filepath
+        super().__init__(**kwargs)
+
+    @defaults_from_attrs("filepath")
+    def run(self, filepath: str = None, **format_kwargs: Any) -> pd.DataFrame:
+        with prefect.context(**format_kwargs) as data:
+
+            self.logger.info("Reading CSV file {} into dataframe.".format(filepath))
+            df = pd.read_csv(filepath)
+
+            return df
+
+
+class PdDataFrameToCSV(Task):
+    """
+    Exports dataframes using temporary dicectory, DataFrame name, name suffix, and config
+    
+    Return a filepaths for the exported Dataframe
+    """
+
+    def __init__(
+        self,
+        df: pd.DataFrame = None,
+        df_name: str = None,
+        df_name_suffix: str = None,
+        config_box: Box = None,
+        index=True,
+        header=True,
+        **kwargs: Any
+    ):
+        self.df = df
+        self.df_name = df_name
+        self.df_name_suffix = df_name_suffix
+        self.config_box = config_box
+        self.index = index
+        self.header = header
+        super().__init__(**kwargs)
+
+    @defaults_from_attrs(
+        "df", "df_name", "df_name_suffix", "config_box", "index", "header"
+    )
+    def run(
+        self,
+        df: pd.DataFrame = None,
+        df_name: str = None,
+        df_name_suffix: str = None,
+        config_box: Box = None,
+        index=True,
+        header=True,
+        **format_kwargs: Any
+    ) -> pd.DataFrame:
+        with prefect.context(**format_kwargs) as data:
+
+            filepath = (
+                config_box.extracttempdir + "/" + df_name + df_name_suffix + ".csv"
+            )
+            self.logger.info("Creating CSV file {} from dataframe.".format(filepath))
+            df.to_csv(filepath, index=index, header=header)
+
+            return filepath
+
+
 class PdBoxedDataFrameToCSV(Task):
     """
     Exports boxed dataframes using temporary dicectory and names from a Dataframe Box
@@ -21,7 +91,13 @@ class PdBoxedDataFrameToCSV(Task):
     """
 
     def __init__(
-        self, dataframe: Box, config_box: Box, index=False, header=True, **kwargs: Any
+        self,
+        dataframe: Box = None,
+        df_name_suffix: str = None,
+        config_box: Box = None,
+        index=False,
+        header=True,
+        **kwargs: Any
     ):
         self.dataframe = dataframe
         self.config_box = config_box
@@ -29,11 +105,12 @@ class PdBoxedDataFrameToCSV(Task):
         self.header = header
         super().__init__(**kwargs)
 
-    @defaults_from_attrs("dataframe", "config_box", "index", "header")
+    @defaults_from_attrs("dataframe", "df_name_suffix", "config_box", "index", "header")
     def run(
         self,
-        dataframe: Box,
-        config_box: Box,
+        dataframe: Box = None,
+        df_name_suffix: str = None,
+        config_box: Box = None,
         index=True,
         header=True,
         **format_kwargs: Any
@@ -47,3 +124,90 @@ class PdBoxedDataFrameToCSV(Task):
                 df.to_csv(filepath, index=index, header=header)
 
             return filepaths
+
+
+class PdDatadictTranslate(Task):
+    """
+    Transforms dataframes to pre-specified formats found in custom Pandas Dataframe data-dictionary content.
+    
+    Returns a translated pd.Dataframe
+    """
+
+    def __init__(
+        self,
+        df: pd.DataFrame = None,
+        datadict: pd.DataFrame = None,
+        oradb_prep: bool = False,
+        no_col_names: bool = False,
+        **kwargs: Any
+    ):
+        self.df = df
+        self.datadict = datadict
+        self.oradb_prep = oradb_prep
+        self.no_col_names = no_col_names
+        super().__init__(**kwargs)
+
+    def set_field_numeric_column_names(self, data: pd.DataFrame) -> pd.DataFrame:
+        # rename columns which may be "blank" from source data to make column names strings and readable
+
+        data.columns = ["field_" + str(x) for x in list(data.columns)]
+
+        return data
+
+    def prep_null_values_for_oradb(self, data: pd.DataFrame) -> pd.DataFrame:
+        # set NA values to 0 or space character, contingent on type found within the datatype
+
+        for col in list(data.columns):
+            # NB The meaning of biufc: b bool, i int (signed), u unsigned int, f float, c complex.
+            # See https://docs.scipy.org/doc/numpy/reference/generated/numpy.dtype.kind.html#numpy.dtype.kind
+            if data[col].dtype.kind in "biufc":
+                data[col] = data[col].fillna(0)
+            else:
+                data[col] = data[col].fillna(" ")
+
+        return data
+
+    @defaults_from_attrs(
+        "df", "datadict", "oradb_prep", "no_col_names",
+    )
+    def run(
+        self,
+        df: pd.DataFrame = None,
+        datadict: pd.DataFrame = None,
+        oradb_prep: bool = False,
+        no_col_names: bool = False,
+        **format_kwargs: Any
+    ) -> pd.DataFrame:
+
+        with prefect.context(**format_kwargs) as data:
+
+            self.logger.info("Translating dataframe using datadictionary values.")
+
+            # if no col names true, we need to update the colnames first
+            if no_col_names:
+                df = self.set_field_numeric_column_names(df)
+
+            # Remap column names from related_name -to-> name
+            df = df.rename(
+                columns=datadict[datadict["related_name"].notnull()]
+                .set_index("related_name")["name"]
+                .to_dict()
+            )
+
+            # Convert to expected pandas dtypes per column
+            df = df.astype(datadict.set_index("name")["pandas_dtype"].to_dict())
+
+            # Ensure we set cols of object type to strings explicitly from pandas
+            for col in df.columns:
+                if str(df[col].dtype) == "object":
+                    df[col] = df[col].astype("str")
+
+            # If oradb_prep true, we need to prepare values for oracle db
+            if oradb_prep:
+                df = self.prep_null_values_for_oradb(df)
+
+            # Reset the cols of the dataframe to drop unrelated cols we no longer need
+            # (dataframe may have had more than dictionary)
+            df = df[datadict["name"].values.tolist()]
+
+            return df

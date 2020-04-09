@@ -94,8 +94,8 @@ class ORADBSelectToDataFrame(Task):
 
     def __init__(
         self,
-        select_stmt: str,
-        engine: sqlalchemy.engine.base.Engine,
+        select_stmt: str=None,
+        engine: sqlalchemy.engine.base.Engine=None,
         index_col=None,
         coerce_float=True,
         params=None,
@@ -126,8 +126,8 @@ class ORADBSelectToDataFrame(Task):
     )
     def run(
         self,
-        select_stmt: str,
-        engine: sqlalchemy.engine.base.Engine,
+        select_stmt: str=None,
+        engine: sqlalchemy.engine.base.Engine=None,
         index_col=None,
         coerce_float=True,
         params=None,
@@ -166,8 +166,8 @@ class ORADBSelectToBoxedDataFrame(Task):
 
     def __init__(
         self,
-        config_box: Box,
-        engine: sqlalchemy.engine.base.Engine,
+        config_box: Box=None,
+        engine: sqlalchemy.engine.base.Engine=None,
         index_col=None,
         coerce_float=True,
         params=None,
@@ -198,8 +198,8 @@ class ORADBSelectToBoxedDataFrame(Task):
     )
     def run(
         self,
-        config_box: Box,
-        engine: sqlalchemy.engine.base.Engine,
+        config_box: Box=None,
+        engine: sqlalchemy.engine.base.Engine=None,
         index_col=None,
         coerce_float=True,
         params=None,

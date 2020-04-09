@@ -65,17 +65,19 @@ class SFTPPut(Task):
 
             self.logger.info("SFTPPut {}".format(workfile))
 
-class SFTPPutFromFilepathsBox(Task):
+class SFTPPutFromBoxedFilepaths(Task):
     """
     Put a files on the FTP server based on a filepaths Box
+
+    May be useful for scenarios where connections are limited to SFTP host. 
     """
 
     def __init__(
         self,
-        filepaths: Box,
-        config_box: Box,
-        cnopts: pysftp.CnOpts,
-        tempfolderpath: str,
+        filepaths: Box=None,
+        config_box: Box=None,
+        cnopts: pysftp.CnOpts=None,
+        tempfolderpath: str=None,
         **kwargs: Any
     ):
         self.filepaths = filepaths
@@ -87,10 +89,10 @@ class SFTPPutFromFilepathsBox(Task):
     @defaults_from_attrs("filepaths", "config_box", "cnopts", "tempfolderpath")
     def run(
         self,
-        filepaths: Box,
-        config_box: Box,
-        cnopts: pysftp.CnOpts,
-        tempfolderpath: str,
+        filepaths: Box=None,
+        config_box: Box=None,
+        cnopts: pysftp.CnOpts=None,
+        tempfolderpath: str=None,
         **format_kwargs: Any
     ):
         with prefect.context(**format_kwargs) as data:
