@@ -140,6 +140,13 @@ class PdDatadictTranslate(Task):
 
             self.logger.info("Translating dataframe using datadictionary values.")
 
+            try:
+                assert len(set(extract.columns)) == len(extract.columns)
+            except AssertionError as e:
+                raise AssertionError(
+                    "There may be duplicate column names in the DataFrame provided. Please ensure column names are unique."
+                )
+
             # if no col names true, we need to update the colnames first
             if no_col_names:
                 df = self.set_field_numeric_column_names(df)
