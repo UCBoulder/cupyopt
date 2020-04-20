@@ -159,7 +159,11 @@ class PdDatadictTranslate(Task):
             )
 
             # Convert to expected pandas dtypes per column
-            df = df.astype(datadict.set_index("name")["pandas_dtype"].to_dict())
+            df = df.astype(
+                datadict[datadict["name"].isin(df.columns)]
+                .set_index("name")["pandas_dtype"]
+                .to_dict()
+            )
 
             # Ensure we set cols of object type to strings explicitly from pandas
             for col in df.columns:
@@ -172,6 +176,6 @@ class PdDatadictTranslate(Task):
 
             # Reset the cols of the dataframe to drop unrelated cols we no longer need
             # (dataframe may have had more than dictionary)
-            df = df[datadict["name"].values.tolist()]
+            df = df[datadict[datadict["name"].isin(df.columns)]["name"].values.tolist()]
 
             return df
