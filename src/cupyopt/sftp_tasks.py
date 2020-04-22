@@ -28,11 +28,11 @@ class SFTPGet(Task):
             username = config_box["username"]
             remoterootpath = config_box["target_dir"]
 
-            if prefect.context.get('parameters'):
-                if prefect.context.parameters.get('cnopts'):
-                    cnopts = prefect.context.parameters['cnopts']
-                if prefect.context.parameters.get('cache'):
-                    tempfolderpath = prefect.context.parameters['cache']
+            if data.get('parameters'):
+                if data.parameters.get('cnopts'):
+                    cnopts = data.parameters['cnopts']
+                if data.parameters.get('cache'):
+                    tempfolderpath = data.parameters['cache']
 
             localtmpfile = os.path.join(tempfolderpath, workfile)
             self.logger.debug("Working on ", localtmpfile)
@@ -63,9 +63,9 @@ class SFTPPut(Task):
             username = config_box["username"]
             remoterootpath = config_box["target_dir"]
 
-            if prefect.context.get('parameters'):
-                if prefect.context.parameters.get('cnopts'):
-                    cnopts = prefect.context.parameters['cnopts']
+            if data.get('parameters'):
+                if data.parameters.get('cnopts'):
+                    cnopts = data.parameters['cnopts']
 
             with pysftp.Connection(
                 host=hostname, username=username, private_key=key_file, cnopts=cnopts
@@ -90,9 +90,9 @@ class SFTPRemove(Task):
             username = config_box["username"]
             remoterootpath = config_box["target_dir"]
 
-            if prefect.context.get('parameters'):
-                if prefect.context.parameters.get('cnopts'):
-                    cnopts = prefect.context.parameters['cnopts']
+            if data.get('parameters'):
+                if data.parameters.get('cnopts'):
+                    cnopts = data.parameters['cnopts']
 
             self.logger.debug("Working on ", workfile)
 
@@ -124,9 +124,9 @@ class SFTPRename(Task):
                 username = config["username"]
                 remoterootpath = config["target_dir"]
 
-                if prefect.context.get('parameters'):
-                    if prefect.context.parameters.get('cnopts'):
-                        cnopts = prefect.context.parameters['cnopts']
+                if data.get('parameters'):
+                    if data.parameters.get('cnopts'):
+                        cnopts = data.parameters['cnopts']
 
                 # "root" is special
                 if source == "root":
@@ -175,9 +175,9 @@ class SFTPPoll(Task):
             username = config_box["username"]
             remoterootpath = config_box["target_dir"]           
 
-            if prefect.context.get('parameters'):
-                if prefect.context.parameters.get('cnopts'):
-                    cnopts = prefect.context.parameters['cnopts']
+            if data.get('parameters'):
+                if data.parameters.get('cnopts'):
+                    cnopts = data.parameters['cnopts']
 
             files_data = []
 
