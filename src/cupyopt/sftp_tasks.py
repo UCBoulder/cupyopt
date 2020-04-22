@@ -20,13 +20,19 @@ class SFTPGet(Task):
     def __init__(self, **kwargs: Any):
         super().__init__(**kwargs)
 
-    def run(self, workfile: str, config_box: Box, cnopts: pysftp.CnOpts, tempfolderpath: str, **format_kwargs: Any) -> str:    
+    def run(self, workfile: str, config_box: Box, cnopts: pysftp.CnOpts = None, tempfolderpath: str = None, **format_kwargs: Any) -> str:    
         with prefect.context(**format_kwargs) as data:
             
             key_file = config_box["private_key_path"]
             hostname = config_box["hostname"]
             username = config_box["username"]
             remoterootpath = config_box["target_dir"]
+
+            if prefect.context.get('parameters'):
+                if prefect.context.parameters.get('cnopts'):
+                    cnopts = prefect.context.parameters['cnopts']
+                if prefect.context.parameters.get('cache'):
+                    tempfolderpath = prefect.context.parameters['cache']
 
             localtmpfile = os.path.join(tempfolderpath, workfile)
             self.logger.debug("Working on ", localtmpfile)
@@ -49,13 +55,17 @@ class SFTPPut(Task):
     def __init__(self, **kwargs: Any):
         super().__init__(**kwargs)
 
-    def run(self, workfile: str, config_box: Box, cnopts: pysftp.CnOpts, **format_kwargs: Any):    
+    def run(self, workfile: str, config_box: Box, cnopts: pysftp.CnOpts = None, **format_kwargs: Any):    
         with prefect.context(**format_kwargs) as data:
             
             key_file = config_box["private_key_path"]
             hostname = config_box["hostname"]
             username = config_box["username"]
             remoterootpath = config_box["target_dir"]
+
+            if prefect.context.get('parameters'):
+                if prefect.context.parameters.get('cnopts'):
+                    cnopts = prefect.context.parameters['cnopts']
 
             with pysftp.Connection(
                 host=hostname, username=username, private_key=key_file, cnopts=cnopts
@@ -72,13 +82,17 @@ class SFTPRemove(Task):
     def __init__(self, **kwargs: Any):
         super().__init__(**kwargs)
 
-    def run(self, workfile: str, config_box: Box, cnopts: pysftp.CnOpts, **format_kwargs: Any):    
+    def run(self, workfile: str, config_box: Box, cnopts: pysftp.CnOpts = None, **format_kwargs: Any):    
         with prefect.context(**format_kwargs) as data:
             
             key_file = config_box["private_key_path"]
             hostname = config_box["hostname"]
             username = config_box["username"]
             remoterootpath = config_box["target_dir"]
+
+            if prefect.context.get('parameters'):
+                if prefect.context.parameters.get('cnopts'):
+                    cnopts = prefect.context.parameters['cnopts']
 
             self.logger.debug("Working on ", workfile)
 
@@ -99,7 +113,7 @@ class SFTPRename(Task):
     def __init__(self, **kwargs: Any):
         super().__init__(**kwargs)
 
-    def run(self, workfile: str, config_box: Box, cnopts: pysftp.CnOpts, source="root", target="wip", **format_kwargs: Any):    
+    def run(self, workfile: str, config_box: Box, source="root", target="wip", cnopts: pysftp.CnOpts = None, **format_kwargs: Any):    
         with prefect.context(**format_kwargs) as data:
 
                 # This moves (renames) files around on the SFTP site.
@@ -109,6 +123,10 @@ class SFTPRename(Task):
                 hostname = config["hostname"]
                 username = config["username"]
                 remoterootpath = config["target_dir"]
+
+                if prefect.context.get('parameters'):
+                    if prefect.context.parameters.get('cnopts'):
+                        cnopts = prefect.context.parameters['cnopts']
 
                 # "root" is special
                 if source == "root":
@@ -149,14 +167,18 @@ class SFTPPoll(Task):
     def __init__(self, **kwargs: Any):
         super().__init__(**kwargs)
 
-    def run(self, config_box: Box, cnopts: pysftp.CnOpts, **format_kwargs: Any) -> pd.DataFrame:    
+    def run(self, config_box: Box, cnopts: pysftp.CnOpts = None, **format_kwargs: Any) -> pd.DataFrame:    
         with prefect.context(**format_kwargs) as data:
 
             key_file = config_box["private_key_path"]
             hostname = config_box["hostname"]
             username = config_box["username"]
             remoterootpath = config_box["target_dir"]           
-            
+
+            if prefect.context.get('parameters'):
+                if prefect.context.parameters.get('cnopts'):
+                    cnopts = prefect.context.parameters['cnopts']
+
             files_data = []
 
             with pysftp.Connection(
