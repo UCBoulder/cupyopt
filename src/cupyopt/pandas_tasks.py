@@ -187,7 +187,7 @@ class PdDatadictTranslate(Task):
             self.logger.info("Translating dataframe using datadictionary values.")
 
             try:
-                assert len(set(extract.columns)) == len(extract.columns)
+                assert len(set(df.columns)) == len(df.columns)
             except AssertionError as e:
                 raise AssertionError(
                     "There may be duplicate column names in the DataFrame provided. Please ensure column names are unique."
