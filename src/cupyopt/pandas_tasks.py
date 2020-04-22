@@ -83,6 +83,52 @@ class PdDataFrameToCSV(Task):
             return filepath
 
 
+class PdDataFrameToParquet(Task):
+    """
+    Exports dataframe to parquet using various options
+    
+    Return a filepaths for the exported Dataframe
+    """
+
+    def __init__(
+        self,
+        df: pd.DataFrame = None,
+        df_name: str = None,
+        df_name_suffix: str = "",
+        config_box: Box = None,
+        index=True,
+        **kwargs: Any
+    ):
+        self.df = df
+        self.df_name = df_name
+        self.df_name_suffix = df_name_suffix
+        self.config_box = config_box
+        self.index = index
+        super().__init__(**kwargs)
+
+    @defaults_from_attrs("df", "df_name", "df_name_suffix", "config_box", "index")
+    def run(
+        self,
+        df: pd.DataFrame = None,
+        df_name: str = None,
+        df_name_suffix: str = "",
+        config_box: Box = None,
+        index=True,
+        **format_kwargs: Any
+    ) -> pd.DataFrame:
+        with prefect.context(**format_kwargs) as data:
+
+            filepath = (
+                config_box.extracttempdir + "/" + df_name + df_name_suffix + ".parquet"
+            )
+            self.logger.info(
+                "Creating Parquet file {} from dataframe.".format(filepath)
+            )
+            df.to_parquet(path=filepath, index=index)
+
+            return filepath
+
+
 class PdDatadictTranslate(Task):
     """
     Transforms dataframes to pre-specified formats found in custom Pandas Dataframe data-dictionary content.
