@@ -53,7 +53,7 @@ class ORADBGetEngine(Task):
             if is_sid:
                 database = config_box["database"]
             else:
-                database = "service_name={}".format(config_box["database"])
+                database = "?service_name={}".format(config_box["database"])
 
             if config_box.get("proxy_username"):
                 username = "{}[{}]".format(
