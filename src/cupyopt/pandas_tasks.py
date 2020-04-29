@@ -15,7 +15,7 @@ import pandera as pa
 
 class PdDataFrameFromCSV(Task):
     """
-    Read CSV into a Pandas DataFrame
+    Read CSV file into a Pandas DataFrame
     
     Return a Pandas DataFrame
     """
@@ -30,6 +30,27 @@ class PdDataFrameFromCSV(Task):
 
             self.logger.info("Reading CSV file {} into dataframe.".format(filepath))
             df = pd.read_csv(filepath)
+
+            return df
+
+
+class PdDataFrameFromParquet(Task):
+    """
+    Read Parquet file into a Pandas DataFrame
+    
+    Return a Pandas DataFrame
+    """
+
+    def __init__(self, filepath: str = None, **kwargs: Any):
+        self.filepath = filepath
+        super().__init__(**kwargs)
+
+    @defaults_from_attrs("filepath")
+    def run(self, filepath: str = None, **format_kwargs: Any) -> pd.DataFrame:
+        with prefect.context(**format_kwargs) as data:
+
+            self.logger.info("Reading Parquet file {} into dataframe.".format(filepath))
+            df = pd.read_parquet(filepath)
 
             return df
 
