@@ -38,8 +38,8 @@ class PaSchemaFromDatadict(Task):
                 regex=row["regex"],
                 checks=None,
             )
-
-        return pa.DataFrameSchema(pa_cols)
+        # note: we assume the columns contained in our dataframe to be validated are exact, thus strict=true always
+        return pa.DataFrameSchema(pa_cols, strict=True)
 
     @defaults_from_attrs("datadict")
     def run(
