@@ -51,11 +51,13 @@ class SFTPGet(Task):
 class SFTPPut(Task):
     """
     Put a file on the FTP server
+    
+    Leave remotepath off, or None and the workfile and the remote file are the same.
     """    
     def __init__(self, **kwargs: Any):
         super().__init__(**kwargs)
 
-    def run(self, workfile: str, config_box: Box, cnopts: pysftp.CnOpts = None, **format_kwargs: Any):    
+    def run(self, workfile: str, config_box: Box, cnopts: pysftp.CnOpts = None, remotepath: str = None, **format_kwargs: Any):    
         with prefect.context(**format_kwargs) as data:
             
             key_file = config_box["private_key_path"]
@@ -71,7 +73,7 @@ class SFTPPut(Task):
                 host=hostname, username=username, private_key=key_file, cnopts=cnopts
             ) as sftp:
                 with sftp.cd(remoterootpath):
-                    sftp.put(workfile, preserve_mtime=False)
+                    sftp.put(workfile, preserve_mtime=False, remotepath=remotepath)
 
             self.logger.info("SFTPPut {}".format(workfile))
 
