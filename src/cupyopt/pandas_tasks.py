@@ -67,6 +67,7 @@ class PdDataFrameToCSV(Task):
         df: pd.DataFrame = None,
         df_name: str = None,
         df_name_suffix: str = "",
+        dir_name: str = "",
         config_box: Box = None,
         index=True,
         header=True,
@@ -75,19 +76,21 @@ class PdDataFrameToCSV(Task):
         self.df = df
         self.df_name = df_name
         self.df_name_suffix = df_name_suffix
+        self.dir_name = dir_name
         self.config_box = config_box
         self.index = index
         self.header = header
         super().__init__(**kwargs)
 
     @defaults_from_attrs(
-        "df", "df_name", "df_name_suffix", "config_box", "index", "header"
+        "df", "df_name", "df_name_suffix", "dir_name", "config_box", "index", "header"
     )
     def run(
         self,
         df: pd.DataFrame = None,
         df_name: str = None,
         df_name_suffix: str = "",
+        dir_name: str = "",
         config_box: Box = None,
         index=True,
         header=True,
@@ -95,9 +98,14 @@ class PdDataFrameToCSV(Task):
     ) -> pd.DataFrame:
         with prefect.context(**format_kwargs) as data:
 
-            filepath = (
-                config_box.extracttempdir + "/" + df_name + df_name_suffix + ".csv"
-            )
+            if config_box:
+                filepath = os.path.join(
+                    config_box.extracttempdir + "/" + df_name + df_name_suffix + ".csv"
+                )
+            else:
+                filename = "{}{}.csv".format(df_name, df_name_suffix)
+                filepath = os.path.join(dir_name, filename)
+
             self.logger.info("Creating CSV file {} from dataframe.".format(filepath))
             df.to_csv(filepath, index=index, header=header)
 
@@ -116,6 +124,7 @@ class PdDataFrameToParquet(Task):
         df: pd.DataFrame = None,
         df_name: str = None,
         df_name_suffix: str = "",
+        dir_name: str = "",
         config_box: Box = None,
         index=True,
         **kwargs: Any
@@ -123,28 +132,42 @@ class PdDataFrameToParquet(Task):
         self.df = df
         self.df_name = df_name
         self.df_name_suffix = df_name_suffix
+        self.dir_name = dir_name
         self.config_box = config_box
         self.index = index
         super().__init__(**kwargs)
 
-    @defaults_from_attrs("df", "df_name", "df_name_suffix", "config_box", "index")
+    @defaults_from_attrs(
+        "df", "df_name", "df_name_suffix", "dir_name", "config_box", "index"
+    )
     def run(
         self,
         df: pd.DataFrame = None,
         df_name: str = None,
         df_name_suffix: str = "",
+        dir_name: str = "",
         config_box: Box = None,
         index=True,
         **format_kwargs: Any
     ) -> pd.DataFrame:
         with prefect.context(**format_kwargs) as data:
 
-            filepath = (
-                config_box.extracttempdir + "/" + df_name + df_name_suffix + ".parquet"
-            )
+            if config_box:
+                filepath = os.path.join(
+                    config_box.extracttempdir
+                    + "/"
+                    + df_name
+                    + df_name_suffix
+                    + ".parquet"
+                )
+            else:
+                filename = "{}{}.parquet".format(df_name, df_name_suffix)
+                filepath = os.path.join(dir_name, filename)
+
             self.logger.info(
                 "Creating Parquet file {} from dataframe.".format(filepath)
             )
+
             df.to_parquet(path=filepath, index=index)
 
             return filepath
