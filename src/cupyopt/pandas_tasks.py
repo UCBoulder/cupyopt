@@ -95,7 +95,7 @@ class PdDataFrameToCSV(Task):
         index=True,
         header=True,
         **format_kwargs: Any
-    ) -> pd.DataFrame:
+    ) -> str:
         with prefect.context(**format_kwargs) as data:
 
             if config_box:
@@ -149,7 +149,7 @@ class PdDataFrameToParquet(Task):
         config_box: Box = None,
         index=True,
         **format_kwargs: Any
-    ) -> pd.DataFrame:
+    ) -> str:
         with prefect.context(**format_kwargs) as data:
 
             if config_box:
