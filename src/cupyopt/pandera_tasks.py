@@ -102,11 +102,17 @@ class PaSchemaFromFile(Task):
 
 class PaValidate(Task):
     """
-    Validates Pandas Dataframes with related Pandera DataFrameSchema. 
-    
-    Note: assumes Box configuration with names that match between Dataframe and DataFrameSchema
-    
-    Return a Box containing named pandas DataFrames
+    Validates Pandas Dataframe with related Pandera DataFrameSchema
+
+    params:
+        df: dataframe to be validated
+        schema: a pre-created pandera dataframeschema which will be used to validate the df
+        head: validate the first n rows. Rows overlapping with tail or sample are de-duplicated.
+        tail: validate the last n rows. Rows overlapping with head or sample are de-duplicated.
+        sample: validate a random sample of n rows. Rows overlapping with head or tail are de-duplicated.
+        random_state: random seed for the sample argument.
+
+    Return a df containing pandas DataFrame
     """
 
     def __init__(
@@ -145,6 +151,83 @@ class PaValidate(Task):
 
             self.logger.info("Validating dataframe using Pandera schema")
             df = schema.validate(
+                df, head=head, tail=tail, sample=sample, random_state=random_state,
+            )
+
+            return df
+
+
+class PaValidateFromDatadict(Task):
+    """
+    Validates Pandas Dataframe with related Pandera DataFrameSchema, built in the same task.
+
+    params:
+        df: dataframe to be validated
+        datadict: datadictionary which will be fabricated as part of this task to validate df
+        head: validate the first n rows. Rows overlapping with tail or sample are de-duplicated.
+        tail: validate the last n rows. Rows overlapping with head or sample are de-duplicated.
+        sample: validate a random sample of n rows. Rows overlapping with head or tail are de-duplicated.
+        random_state: random seed for the sample argument.
+
+    Return a df containing pandas DataFrame
+    """
+
+    def __init__(
+        self,
+        df: pd.DataFrame = None,
+        datadict: pd.DataFrame = None,
+        head: Optional[int] = None,
+        tail: Optional[int] = None,
+        sample: Optional[int] = None,
+        random_state: Optional[int] = None,
+        **kwargs: Any
+    ):
+        self.df = df
+        self.datadict = datadict
+        self.head = head
+        self.tail = tail
+        self.sample = sample
+        self.random_state = random_state
+        super().__init__(**kwargs)
+
+    @defaults_from_attrs(
+        "df", "datadict", "head", "tail", "sample", "random_state",
+    )
+    def pandera_schema_from_dataframe(self, df: pd.DataFrame) -> pa.DataFrameSchema:
+        pa_cols = {}
+
+        for row in df.to_dict(orient="records"):
+            pa_cols[row["name"]] = pa.Column(
+                name=row["name"],
+                pandas_dtype=row["pandas_dtype"],
+                nullable=row["nullable"],
+                allow_duplicates=row["allow_duplicates"],
+                coerce=row["coerce"],
+                required=row["required"],
+                regex=row["regex"],
+                checks=None,
+            )
+        # note: we assume the columns contained in our dataframe to be validated are exact, thus strict=true always
+        return pa.DataFrameSchema(pa_cols, strict=True)
+
+    def run(
+        self,
+        df: pd.DataFrame = None,
+        datadict: pd.DataFrame = None,
+        head: Optional[int] = None,
+        tail: Optional[int] = None,
+        sample: Optional[int] = None,
+        random_state: Optional[int] = None,
+        **format_kwargs: Any
+    ) -> pd.DataFrame:
+
+        with prefect.context(**format_kwargs) as data:
+
+            self.logger.info("Creating Pandera schema using datadictionary Dataframe")
+            pa_schema = self.pandera_schema_from_dataframe(datadict)
+
+            self.logger.info("Validating dataframe using Pandera schema")
+            df = pa_schema.validate(
                 df, head=head, tail=tail, sample=sample, random_state=random_state,
             )
 
