@@ -101,7 +101,7 @@ class PdDataFrameToCSV(Task):
         index=True,
         header=True,
         **format_kwargs: Any
-    ) -> pd.DataFrame:
+    ) -> str:
         with prefect.context(**format_kwargs) as data:
 
             if temp_name and dir_name != "":
@@ -109,10 +109,10 @@ class PdDataFrameToCSV(Task):
 
             elif config_box and dir_name == "":
                 filepath = os.path.join(
-                    config_box.extracttempdir + "/" + df_name + df_name_suffix + ".csv"
+                    config_box.extracttempdir,"{}{}{}.csv".format(df_name_prefix, df_name, df_name_suffix)
                 )
             else:
-                filename = "{}{}.csv".format(df_name, df_name_suffix)
+                filename = "{}{}{}.csv".format(df_name_prefix, df_name, df_name_suffix)
                 filepath = os.path.join(dir_name, filename)
 
             self.logger.info("Creating CSV file {} from dataframe.".format(filepath))
@@ -162,7 +162,7 @@ class PdDataFrameToParquet(Task):
         config_box: Box = None,
         index=True,
         **format_kwargs: Any
-    ) -> pd.DataFrame:
+    ) -> str:
         with prefect.context(**format_kwargs) as data:
 
             if temp_name and dir_name != "":
@@ -170,10 +170,10 @@ class PdDataFrameToParquet(Task):
 
             elif config_box and dir_name == "":
                 filepath = os.path.join(
-                    config_box.extracttempdir + "/" + df_name + df_name_suffix + ".parquet"
+                    config_box.extracttempdir, "{}{}{}.parquet".format(df_name_prefix, df_name, df_name_suffix)
                 )
             else:
-                filename = "{}{}.parquet".format(df_name, df_name_suffix)
+                filename = "{}{}{}.parquet".format(df_name_prefix, df_name, df_name_suffix)
                 filepath = os.path.join(dir_name, filename)
 
             self.logger.info("Creating Parquet file {} from dataframe.".format(filepath))
