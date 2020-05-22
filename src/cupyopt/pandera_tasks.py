@@ -30,7 +30,7 @@ class PaSchemaFromDatadict(Task):
         for row in df.to_dict(orient="records"):
             pa_cols[row["name"]] = pa.Column(
                 name=row["name"],
-                pandas_dtype=row["pandas_dtype"],
+                pandas_dtype=pa.PandasDtype.from_str_alias(str(row["pandas_dtype"])),
                 nullable=row["nullable"],
                 allow_duplicates=row["allow_duplicates"],
                 coerce=row["coerce"],
@@ -70,7 +70,7 @@ class PaSchemaFromFile(Task):
         for row in pa_df.to_dict(orient="records"):
             pa_cols[row["name"]] = pa.Column(
                 name=row["name"],
-                pandas_dtype=row["pandas_dtype"],
+                pandas_dtype=pa.PandasDtype.from_str_alias(str(row["pandas_dtype"])),
                 nullable=row["nullable"],
                 allow_duplicates=row["allow_duplicates"],
                 coerce=row["coerce"],
