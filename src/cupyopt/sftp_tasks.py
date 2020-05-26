@@ -72,6 +72,11 @@ class SFTPPut(Task):
             with pysftp.Connection(
                 host=hostname, username=username, private_key=key_file, cnopts=cnopts
             ) as sftp:
+            
+                # if the root path doesn't exist... attempt to create it
+                if not sftp.isdir(remoterootpath):
+                    sftp.mkdir(remoterootpath)
+                                
                 with sftp.cd(remoterootpath):
                     sftp.put(workfile, preserve_mtime=False, remotepath=remotepath)
 
@@ -233,7 +238,8 @@ class DFGetOldestFile(Task):
                 raise ValueError("The 'File Name' column is missing from the dataframe.")
 
             if len(files_df.index) == 0:
-                raise ValueError("The given DataFrame is empty.")
+                self.logger.debug("The given DataFrame is empty.")
+                return None
 
             if regex_search:
                 files_df = files_df[
