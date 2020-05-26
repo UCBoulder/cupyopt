@@ -238,7 +238,8 @@ class DFGetOldestFile(Task):
                 raise ValueError("The 'File Name' column is missing from the dataframe.")
 
             if len(files_df.index) == 0:
-                raise ValueError("The given DataFrame is empty.")
+                self.logger.debug("The given DataFrame is empty.")
+                return None
 
             if regex_search:
                 files_df = files_df[
