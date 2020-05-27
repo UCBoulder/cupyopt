@@ -24,10 +24,10 @@ class PaSchemaFromDatadict(Task):
         self.datadict = datadict
         super().__init__(**kwargs)
 
-    def pandera_schema_from_dataframe(self, df: pd.DataFrame) -> pa.DataFrameSchema:
+    def pandera_schema_from_dataframe(self, datadict: pd.DataFrame) -> pa.DataFrameSchema:
         pa_cols = {}
 
-        for row in df.to_dict(orient="records"):
+        for row in datadict.to_dict(orient="records"):
             pa_cols[row["name"]] = pa.Column(
                 name=row["name"],
                 pandas_dtype=pa.PandasDtype.from_str_alias(str(row["pandas_dtype"])),
@@ -48,7 +48,7 @@ class PaSchemaFromDatadict(Task):
         with prefect.context(**format_kwargs) as data:
             self.logger.info("Creating Pandera schema using datadictionary Dataframe")
 
-            pa_schema = self.pandera_schema_from_dataframe(datadict)
+            pa_schema = self.pandera_schema_from_dataframe(datadict=datadict)
 
             return pa_schema
 
@@ -190,13 +190,10 @@ class PaValidateFromDatadict(Task):
         self.random_state = random_state
         super().__init__(**kwargs)
 
-    @defaults_from_attrs(
-        "df", "datadict", "head", "tail", "sample", "random_state",
-    )
-    def pandera_schema_from_dataframe(self, df: pd.DataFrame) -> pa.DataFrameSchema:
+    def pandera_schema_from_dataframe(self, datadict: pd.DataFrame) -> pa.DataFrameSchema:
         pa_cols = {}
 
-        for row in df.to_dict(orient="records"):
+        for row in datadict.to_dict(orient="records"):
             pa_cols[row["name"]] = pa.Column(
                 name=row["name"],
                 pandas_dtype=row["pandas_dtype"],
@@ -210,6 +207,9 @@ class PaValidateFromDatadict(Task):
         # note: we assume the columns contained in our dataframe to be validated are exact, thus strict=true always
         return pa.DataFrameSchema(pa_cols, strict=True)
 
+    @defaults_from_attrs(
+        "df", "datadict", "head", "tail", "sample", "random_state",
+    )
     def run(
         self,
         df: pd.DataFrame = None,
@@ -224,7 +224,7 @@ class PaValidateFromDatadict(Task):
         with prefect.context(**format_kwargs) as data:
 
             self.logger.info("Creating Pandera schema using datadictionary Dataframe")
-            pa_schema = self.pandera_schema_from_dataframe(datadict)
+            pa_schema = self.pandera_schema_from_dataframe(datadict=datadict)
 
             self.logger.info("Validating dataframe using Pandera schema")
             df = pa_schema.validate(
