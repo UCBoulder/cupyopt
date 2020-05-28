@@ -24,7 +24,9 @@ class PaSchemaFromDatadict(Task):
         self.datadict = datadict
         super().__init__(**kwargs)
 
-    def pandera_schema_from_dataframe(self, datadict: pd.DataFrame) -> pa.DataFrameSchema:
+    def pandera_schema_from_dataframe(
+        self, datadict: pd.DataFrame
+    ) -> pa.DataFrameSchema:
         pa_cols = {}
 
         for row in datadict.to_dict(orient="records"):
@@ -46,8 +48,13 @@ class PaSchemaFromDatadict(Task):
         self, datadict: pd.DataFrame = None, **format_kwargs: Any
     ) -> pa.DataFrameSchema:
         with prefect.context(**format_kwargs) as data:
-            self.logger.info("Creating Pandera schema using datadictionary Dataframe")
 
+            if datadict.empty:
+                raise Exception(
+                    "Datadictionary is empty! Provide a non-empty datadict in order to proceed."
+                )
+
+            self.logger.info("Creating Pandera schema using datadictionary Dataframe")
             pa_schema = self.pandera_schema_from_dataframe(datadict=datadict)
 
             return pa_schema
@@ -190,7 +197,9 @@ class PaValidateFromDatadict(Task):
         self.random_state = random_state
         super().__init__(**kwargs)
 
-    def pandera_schema_from_dataframe(self, datadict: pd.DataFrame) -> pa.DataFrameSchema:
+    def pandera_schema_from_dataframe(
+        self, datadict: pd.DataFrame
+    ) -> pa.DataFrameSchema:
         pa_cols = {}
 
         for row in datadict.to_dict(orient="records"):
@@ -222,6 +231,11 @@ class PaValidateFromDatadict(Task):
     ) -> pd.DataFrame:
 
         with prefect.context(**format_kwargs) as data:
+
+            if datadict.empty:
+                raise Exception(
+                    "Datadictionary is empty! Provide a non-empty datadict in order to proceed."
+                )
 
             self.logger.info("Creating Pandera schema using datadictionary Dataframe")
             pa_schema = self.pandera_schema_from_dataframe(datadict=datadict)

@@ -87,7 +87,15 @@ class PdDataFrameToCSV(Task):
         super().__init__(**kwargs)
 
     @defaults_from_attrs(
-        "df", "df_name", "temp_name", "df_name_prefix", "df_name_suffix", "dir_name", "config_box", "index", "header"
+        "df",
+        "df_name",
+        "temp_name",
+        "df_name_prefix",
+        "df_name_suffix",
+        "dir_name",
+        "config_box",
+        "index",
+        "header",
     )
     def run(
         self,
@@ -105,11 +113,14 @@ class PdDataFrameToCSV(Task):
         with prefect.context(**format_kwargs) as data:
 
             if temp_name and dir_name != "":
-                filepath = mkstemp(suffix=df_name_suffix,prefix=df_name_prefix,dir=dir_name)[1]
+                filepath = mkstemp(
+                    suffix=df_name_suffix, prefix=df_name_prefix, dir=dir_name
+                )[1]
 
             elif config_box and dir_name == "":
                 filepath = os.path.join(
-                    config_box.extracttempdir,"{}{}{}.csv".format(df_name_prefix, df_name, df_name_suffix)
+                    config_box.extracttempdir,
+                    "{}{}{}.csv".format(df_name_prefix, df_name, df_name_suffix),
                 )
             else:
                 filename = "{}{}{}.csv".format(df_name_prefix, df_name, df_name_suffix)
@@ -150,7 +161,16 @@ class PdDataFrameToParquet(Task):
         self.index = index
         super().__init__(**kwargs)
 
-    @defaults_from_attrs("df", "df_name", "temp_name", "df_name_prefix", "df_name_suffix", "dir_name", "config_box", "index")
+    @defaults_from_attrs(
+        "df",
+        "df_name",
+        "temp_name",
+        "df_name_prefix",
+        "df_name_suffix",
+        "dir_name",
+        "config_box",
+        "index",
+    )
     def run(
         self,
         df: pd.DataFrame = None,
@@ -166,17 +186,24 @@ class PdDataFrameToParquet(Task):
         with prefect.context(**format_kwargs) as data:
 
             if temp_name and dir_name != "":
-                filepath = mkstemp(suffix=df_name_suffix,prefix=df_name_prefix,dir=dir_name)[1]
+                filepath = mkstemp(
+                    suffix=df_name_suffix, prefix=df_name_prefix, dir=dir_name
+                )[1]
 
             elif config_box and dir_name == "":
                 filepath = os.path.join(
-                    config_box.extracttempdir, "{}{}{}.parquet".format(df_name_prefix, df_name, df_name_suffix)
+                    config_box.extracttempdir,
+                    "{}{}{}.parquet".format(df_name_prefix, df_name, df_name_suffix),
                 )
             else:
-                filename = "{}{}{}.parquet".format(df_name_prefix, df_name, df_name_suffix)
+                filename = "{}{}{}.parquet".format(
+                    df_name_prefix, df_name, df_name_suffix
+                )
                 filepath = os.path.join(dir_name, filename)
 
-            self.logger.info("Creating Parquet file {} from dataframe.".format(filepath))
+            self.logger.info(
+                "Creating Parquet file {} from dataframe.".format(filepath)
+            )
 
             df.to_parquet(path=filepath, index=index)
 
@@ -237,6 +264,11 @@ class PdDatadictTranslate(Task):
     ) -> pd.DataFrame:
 
         with prefect.context(**format_kwargs) as data:
+
+            if datadict.empty:
+                raise Exception(
+                    "Datadictionary is empty! Provide a non-empty datadict in order to proceed."
+                )
 
             self.logger.info("Translating dataframe using datadictionary values.")
 
