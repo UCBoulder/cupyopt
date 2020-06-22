@@ -41,10 +41,13 @@ class SFTPGet(Task):
             with pysftp.Connection(
                 host=hostname, username=username, private_key=key_file, cnopts=cnopts
             ) as sftp:
-                with sftp.cd(remoterootpath):
-                    sftp.get(workfile, localpath=localtmpfile, preserve_mtime=False)
+                try:
+                    with sftp.cd(remoterootpath):
+                        sftp.get(workfile, localpath=localtmpfile, preserve_mtime=False)
+                except FileNotFoundError:
+                    self.logger.warning("SFTPGet, cannot find {} on SFTP site.".format(workfile))
+                    return None
 
-            # Read the file into a dataframe
             self.logger.info("SFTPGet {}".format(localtmpfile))
             return localtmpfile
 
