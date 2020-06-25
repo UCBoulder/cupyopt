@@ -11,6 +11,34 @@ from prefect import Task
 from prefect.utilities.tasks import defaults_from_attrs
 from box import Box
 
+class SFTPExists(Task):
+    """
+    Checks filename from FTP server
+    
+    Return True if found, otherwise False
+    """    
+    def __init__(self, **kwargs: Any):
+        super().__init__(**kwargs)
+
+    def run(self, workfile: str, config_box: Box, cnopts: pysftp.CnOpts = None, **format_kwargs: Any) -> str:    
+        with prefect.context(**format_kwargs) as data:
+            
+            if data.get('parameters'):
+                if data.parameters.get('cnopts'):
+                    cnopts = data.parameters['cnopts']
+                    
+            hostname = config_box["hostname"]
+            username = config_box["username"]
+            remoterootpath = config_box["target_dir"]
+            key_file = config_box["private_key_path"]
+            password = config_box["password"]
+
+            with pysftp.Connection(
+                host=hostname, username=username, private_key=key_file, password=password, cnopts=cnopts
+            ) as sftp:
+                with sftp.cd(remoterootpath):
+                    return sftp.exists(workfile)
+
 class SFTPGet(Task):
     """
     Fetch filename from FTP server
