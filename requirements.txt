@@ -8,6 +8,6 @@ prefect==0.11.5
 sqlalchemy
 cx_Oracle
 pyarrow
-pandera
+pandera==0.4.4
 sqlalchemy
 cx_Oracle
