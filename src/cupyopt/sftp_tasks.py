@@ -26,24 +26,14 @@ class SFTPExists(Task):
             if data.get('parameters'):
                 if data.parameters.get('cnopts'):
                     cnopts = data.parameters['cnopts']
-                    
+
+            key_file = config_box["private_key_path"]
             hostname = config_box["hostname"]
             username = config_box["username"]
             remoterootpath = config_box["target_dir"]
-            
-            # We have to handle either a password or a key
-            if config_box.get('private_key_path'):
-                key_file = config_box["private_key_path"]
-            else:
-                key_file = None
-                
-            if config_box.get('password'):
-                password = config_box["password"]
-            else:
-                password = None
 
             with pysftp.Connection(
-                host=hostname, username=username, private_key=key_file, password=password, cnopts=cnopts
+                host=hostname, username=username, private_key=key_file, cnopts=cnopts
             ) as sftp:
                 with sftp.cd(remoterootpath):
                     return sftp.exists(workfile)
