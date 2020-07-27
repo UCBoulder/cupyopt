@@ -21,11 +21,11 @@ ORADB Tasks:
 Installation
 ------------
 
-From pip: pip install git+https://bitbucket.colorado.edu/scm/datasvcs/cupyopt.git@master#egg=cupyopt
+From pip: pip install git+https://github.com/CUBoulder-OIT/cupyopt.git@master#egg=cupyopt
 
 Alternatively, and importantly for development, clone this into an existing project and install in "development mode" with -e.
 
-git clone https://bitbucket.colorado.edu/scm/datasvcs/cupyopt.git
+git clone https://github.com/CUBoulder-OIT/cupyopt.git
 pip install -e cupyopt/
 
 Use
