@@ -1,7 +1,5 @@
-cupyopt
-=======
-
-CU's Python Opinionated Prefect Tasks
+CU's Python Opinionated Prefect Tasks (cupyopt)
+===============================================
 
 A package of Prefect Tasks and helpers
 
