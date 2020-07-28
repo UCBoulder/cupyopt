@@ -38,4 +38,6 @@ from cupyopt import SFTPGet, ORADBGetEngine
 Contributing?
 -------------
 
-Create an issue, submit a PR. All are welcome. Flow practices very roughly hew to one-flow: https://reallifeprogramming.com/git-process-that-works-say-no-to-gitflow-50bf2038ccf7
+Create an issue, fork the repo, fix an issue, submit a PR. All are welcome. 
+
+Flow practices very roughly hew to one-flow: https://reallifeprogramming.com/git-process-that-works-say-no-to-gitflow-50bf2038ccf7
