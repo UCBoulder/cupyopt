@@ -1,13 +1,13 @@
 nose
-pandas~=1.0.5
+pandas~=1.0
 pysftp
 sphinx
 sphinx_rtd_theme
 pygrok
-prefect~=0.11.5
+prefect~=0.12
 sqlalchemy
 cx_Oracle
 pyarrow
-pandera~=0.4.4
+pandera~=0.4
 sqlalchemy
 cx_Oracle
