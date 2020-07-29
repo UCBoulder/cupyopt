@@ -1,7 +1,7 @@
 CU's Python Opinionated Prefect Tasks (cupyopt)
 ===============================================
 
-A package of Prefect Tasks and helpers.
+A package of `Prefect <https://github.com/PrefectHQ/prefect>`_ Tasks and helpers.
 
 Minimum Python 3.6
 
