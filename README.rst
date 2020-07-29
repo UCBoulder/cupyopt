@@ -26,7 +26,7 @@ Alternatively, and importantly for development, clone this into an existing proj
 git clone https://github.com/CUBoulder-OIT/cupyopt.git
 pip install -e cupyopt/
 
-NB, The 'x' and 'y' (lately 0.12) in the versioning matches the versioning in Prefect. However the 'z' is ours and is not guaranteed to match up with the 'z' in Prefect.
+NB, The 'x.y.z' (e.g. 0.12.6) in the versioning matches the versioning in Prefect. However the 4th section is ours to be unique within that version.
 
 Use
 ---
