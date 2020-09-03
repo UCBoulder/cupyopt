@@ -9,3 +9,5 @@ pyarrow
 pandera>=0.4.4
 sqlalchemy
 cx_Oracle
+fastavro
+pandavro
