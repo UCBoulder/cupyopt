@@ -2,7 +2,7 @@ import json
 import pandas as pd
 import fastavro as avro
 import pandavro as pda
-
+from typing import Union
 
 def avro_schema(avsc: Union[dict, str]) -> dict:
 
