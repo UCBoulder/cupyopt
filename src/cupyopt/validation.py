@@ -17,5 +17,5 @@ def pa_validate(df: pd.DataFrame, schema: pa.DataFrameSchema) -> pd.DataFrame:
 
 def df_avro_validate(df: pd.DataFrame, avsc: dict) -> bool:
     return avro.validation.validate_many(
-        records=df.replace(pd.NA, "").to_dict(orient="records"), schema=parsed_schema
+        records=df.replace(pd.NA, "").to_dict(orient="records"), schema=avsc
     )
