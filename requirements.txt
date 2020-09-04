@@ -9,5 +9,5 @@ pyarrow
 pandera>=0.4.4
 sqlalchemy
 cx_Oracle
-fastavro
-pandavro
+fastavro==1.0.0.post1
+pandavro==1.5.2
