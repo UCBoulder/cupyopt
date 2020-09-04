@@ -36,9 +36,9 @@ def infer_df_avro_schema(
 
 def avro_schema_to_file(avsc: dict, filename: str = None, filedir: str = "./"):
 
-    # infer the filename based on the namespace.name from the avro dict key:values
+    # infer the filename based on the avro schema name from the avro dict key:values
     if not filename:
-        filename = avro.schema.fullname(avsc)
+        filename = avsc["name"]
 
     # create internal copy of avro dict so as to not otherwise interfere
     _avsc = avsc.copy()
