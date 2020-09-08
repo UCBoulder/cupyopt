@@ -34,7 +34,12 @@ class SFTPExists(Task):
             # We have to handle either a password or a key
             if config_box.get('private_key_path'):
                 private_key = config_box["private_key_path"]
-                sftp = pysftp.Connection(host=hostname, username=username, private_key=private_key, cnopts=cnopts)
+                if config_box.get('private_key_passphrase'):
+                    # has a passphrase, use it
+                    private_key_passphrase = config_box["private_key_passphrase"]
+                    sftp = pysftp.Connection(host=hostname, username=username, private_key=private_key, private_key_pass=private_key_passphrase, cnopts=cnopts)
+                else:
+                    sftp = pysftp.Connection(host=hostname, username=username, private_key=private_key, cnopts=cnopts)
             elif config_box.get('password'):
                 password = config_box["password"]
                 sftp = pysftp.Connection(host=hostname, username=username, password=password, cnopts=cnopts)
@@ -74,7 +79,12 @@ class SFTPGet(Task):
 
             if config_box.get('private_key_path'):
                 private_key = config_box["private_key_path"]
-                sftp = pysftp.Connection(host=hostname, username=username, private_key=private_key, cnopts=cnopts)
+                if config_box.get('private_key_passphrase'):
+                    # has a passphrase, use it
+                    private_key_passphrase = config_box["private_key_passphrase"]
+                    sftp = pysftp.Connection(host=hostname, username=username, private_key=private_key, private_key_pass=private_key_passphrase, cnopts=cnopts)
+                else:
+                    sftp = pysftp.Connection(host=hostname, username=username, private_key=private_key, cnopts=cnopts)
             elif config_box.get('password'):
                 password = config_box["password"]
                 sftp = pysftp.Connection(host=hostname, username=username, password=password, cnopts=cnopts)
@@ -111,7 +121,12 @@ class SFTPPut(Task):
                     
             if config_box.get('private_key_path'):
                 private_key = config_box["private_key_path"]
-                sftp = pysftp.Connection(host=hostname, username=username, private_key=private_key, cnopts=cnopts)
+                if config_box.get('private_key_passphrase'):
+                    # has a passphrase, use it
+                    private_key_passphrase = config_box["private_key_passphrase"]
+                    sftp = pysftp.Connection(host=hostname, username=username, private_key=private_key, private_key_pass=private_key_passphrase, cnopts=cnopts)
+                else:
+                    sftp = pysftp.Connection(host=hostname, username=username, private_key=private_key, cnopts=cnopts)
             elif config_box.get('password'):
                 password = config_box["password"]
                 sftp = pysftp.Connection(host=hostname, username=username, password=password, cnopts=cnopts)
@@ -149,7 +164,12 @@ class SFTPRemove(Task):
 
             if config_box.get('private_key_path'):
                 private_key = config_box["private_key_path"]
-                sftp = pysftp.Connection(host=hostname, username=username, private_key=private_key, cnopts=cnopts)
+                if config_box.get('private_key_passphrase'):
+                    # has a passphrase, use it
+                    private_key_passphrase = config_box["private_key_passphrase"]
+                    sftp = pysftp.Connection(host=hostname, username=username, private_key=private_key, private_key_pass=private_key_passphrase, cnopts=cnopts)
+                else:
+                    sftp = pysftp.Connection(host=hostname, username=username, private_key=private_key, cnopts=cnopts)
             elif config_box.get('password'):
                 password = config_box["password"]
                 sftp = pysftp.Connection(host=hostname, username=username, password=password, cnopts=cnopts)
@@ -187,7 +207,12 @@ class SFTPRename(Task):
 
             if config_box.get('private_key_path'):
                 private_key = config_box["private_key_path"]
-                sftp = pysftp.Connection(host=hostname, username=username, private_key=private_key, cnopts=cnopts)
+                if config_box.get('private_key_passphrase'):
+                    # has a passphrase, use it
+                    private_key_passphrase = config_box["private_key_passphrase"]
+                    sftp = pysftp.Connection(host=hostname, username=username, private_key=private_key, private_key_pass=private_key_passphrase, cnopts=cnopts)
+                else:
+                    sftp = pysftp.Connection(host=hostname, username=username, private_key=private_key, cnopts=cnopts)
             elif config_box.get('password'):
                 password = config_box["password"]
                 sftp = pysftp.Connection(host=hostname, username=username, password=password, cnopts=cnopts)
@@ -244,7 +269,12 @@ class SFTPPoll(Task):
 
             if config_box.get('private_key_path'):
                 private_key = config_box["private_key_path"]
-                sftp = pysftp.Connection(host=hostname, username=username, private_key=private_key, cnopts=cnopts)
+                if config_box.get('private_key_passphrase'):
+                    # has a passphrase, use it
+                    private_key_passphrase = config_box["private_key_passphrase"]
+                    sftp = pysftp.Connection(host=hostname, username=username, private_key=private_key, private_key_pass=private_key_passphrase, cnopts=cnopts)
+                else:
+                    sftp = pysftp.Connection(host=hostname, username=username, private_key=private_key, cnopts=cnopts)
             elif config_box.get('password'):
                 password = config_box["password"]
                 sftp = pysftp.Connection(host=hostname, username=username, password=password, cnopts=cnopts)
