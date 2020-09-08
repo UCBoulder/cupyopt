@@ -2,7 +2,7 @@ nose
 pandas>=1.1.1
 pysftp
 pygrok
-prefect==0.13.3
+prefect==0.13.5
 sqlalchemy
 cx_Oracle
 pyarrow
