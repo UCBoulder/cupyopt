@@ -35,6 +35,14 @@ Import the Task you need similar to,
 
 from cupyopt import SFTPGet, ORADBGetEngine
 
+Tests
+-----
+
+::
+
+	pip install pytest
+	pytest tests
+
 Contributing?
 -------------
 
