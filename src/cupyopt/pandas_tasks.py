@@ -1,16 +1,15 @@
-import pandas as pd
-import pysftp
 import datetime
 import logging
-import prefect
 import os
 import tempfile
-
 from typing import Any, Optional
+
+import pandas as pd
+import prefect
+import pysftp
+from box import Box
 from prefect import Task
 from prefect.utilities.tasks import defaults_from_attrs
-from box import Box
-import pandera as pa
 
 
 class PdDataFrameFromCSV(Task):
@@ -210,104 +209,38 @@ class PdDataFrameToParquet(Task):
             return filepath
 
 
-class PdDatadictTranslate(Task):
+class PdColRenameAndFilter(Task):
     """
-    Transforms dataframes to pre-specified formats found in custom Pandas Dataframe data-dictionary content.
+    Rename and filter Pandas Dataframe columns using python dictionary.
+
+    Column names provided in coldict follow the same format as expected by 
+    pd.DataFrame.rename(columns=dict). For example: {"current":"new", "current2":"new2"}
+
+    Columns in returned dataframe are filtered by those provided to be renamed.
     
-    Returns a translated pd.Dataframe
+    Returns a modified pd.Dataframe copy
     """
 
-    def __init__(
-        self,
-        df: pd.DataFrame = None,
-        datadict: pd.DataFrame = None,
-        oradb_prep: bool = False,
-        no_col_names: bool = False,
-        **kwargs: Any
-    ):
+    def __init__(self, df: pd.DataFrame, coldict: dict, **kwargs: Any):
         self.df = df
-        self.datadict = datadict
-        self.oradb_prep = oradb_prep
-        self.no_col_names = no_col_names
+        self.coldict = coldict
         super().__init__(**kwargs)
 
-    def set_field_numeric_column_names(self, data: pd.DataFrame) -> pd.DataFrame:
-        # rename columns which may be "blank" from source data to make column names strings and readable
-
-        data.columns = ["field_" + str(x) for x in list(data.columns)]
-
-        return data
-
-    def prep_null_values_for_oradb(self, data: pd.DataFrame) -> pd.DataFrame:
-        # set NA values to 0 or space character, contingent on type found within the datatype
-
-        for col in list(data.columns):
-            # NB The meaning of biufc: b bool, i int (signed), u unsigned int, f float, c complex.
-            # See https://docs.scipy.org/doc/numpy/reference/generated/numpy.dtype.kind.html#numpy.dtype.kind
-            if data[col].dtype.kind in "biufc":
-                data[col] = data[col].fillna(0)
-            else:
-                data[col] = data[col].fillna(" ")
-
-        return data
-
-    @defaults_from_attrs(
-        "df", "datadict", "oradb_prep", "no_col_names",
-    )
+    @defaults_from_attrs("df", "coldict")
     def run(
-        self,
-        df: pd.DataFrame = None,
-        datadict: pd.DataFrame = None,
-        oradb_prep: bool = False,
-        no_col_names: bool = False,
-        **format_kwargs: Any
+        self, df: pd.DataFrame, coldict: dict, **format_kwargs: Any
     ) -> pd.DataFrame:
 
         with prefect.context(**format_kwargs) as data:
 
-            if datadict.empty:
-                raise Exception(
-                    "Datadictionary is empty! Provide a non-empty datadict in order to proceed."
-                )
-
-            self.logger.info("Translating dataframe using datadictionary values.")
-
-            try:
-                assert len(set(df.columns)) == len(df.columns)
-            except AssertionError as e:
-                raise AssertionError(
-                    "There may be duplicate column names in the DataFrame provided. Please ensure column names are unique."
-                )
-
-            # if no col names true, we need to update the colnames first
-            if no_col_names:
-                df = self.set_field_numeric_column_names(df)
-
-            # Remap column names from related_name -to-> name
-            df = df.rename(
-                columns=datadict[datadict["related_name"].notnull()]
-                .set_index("related_name")["name"]
-                .to_dict()
+            self.logger.info(
+                "Renaming and filtering dataframe columns using coldict key:values."
             )
 
-            # Convert to expected pandas dtypes per column
-            df = df.astype(
-                datadict[datadict["name"].isin(df.columns)]
-                .set_index("name")["pandas_dtype"]
-                .to_dict()
-            )
+            # Remap column names
+            df = df.rename(columns=coldict)
 
-            # Ensure we set cols of object type to strings explicitly from pandas
-            for col in df.columns:
-                if str(df[col].dtype) == "object":
-                    df[col] = df[col].astype("str")
-
-            # If oradb_prep true, we need to prepare values for oracle db
-            if oradb_prep:
-                df = self.prep_null_values_for_oradb(df)
-
-            # Reset the cols of the dataframe to drop unrelated cols we no longer need
-            # (dataframe may have had more than dictionary)
-            df = df[datadict[datadict["name"].isin(df.columns)]["name"].values.tolist()]
+            # Filter columns based on the new names
+            df = df[[val for key, val in coldict.items()]].copy()
 
             return df

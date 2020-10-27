@@ -6,7 +6,6 @@ prefect==0.13.12
 sqlalchemy
 cx_Oracle
 pyarrow
-pandera>=0.4.4
 sqlalchemy
 cx_Oracle
 fastavro==1.0.0.post1
