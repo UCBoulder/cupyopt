@@ -11,8 +11,8 @@ def test_PdColRenameAndFilter():
 	# create a dict to be used for renaming and filtering columns in df
 	coldict = {"A":"tiger"}
 	# instantiate the task class
-	task = PdColRenameAndFilter(df=df,coldict=coldict)
+	task = PdColRenameAndFilter()
 	# run task to rename and filter the dataframe
-	new_df = task.run()
+	new_df = task.run(df=df,coldict=coldict)
 	# test whether we have a single filtered and renamed column remaining in new df
 	assert(list(new_df.columns) == ["tiger"])
