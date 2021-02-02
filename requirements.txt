@@ -1,5 +1,5 @@
 nose
-pandas>=1.1.1
+pandas>=1.2.1
 pysftp
 pygrok
 prefect==0.14.5
