@@ -18,7 +18,7 @@ from sqlalchemy.dialects.oracle import VARCHAR2
 class ORADBGetEngine(Task):
     """
     Configure an sqlalchemy engine with cx_Oracle
-    
+
     Return a sqlalchemy engine
     """
 
@@ -90,8 +90,8 @@ class ORADBGetEngine(Task):
 class ORADBSelectToDataFrame(Task):
     """
     Runs select statement against database using SQLAlchemy engine.
-    
-    Return a Pandas DataFrame with data collected from SQL statement. 
+
+    Return a Pandas DataFrame with data collected from SQL statement.
     """
 
     def __init__(
