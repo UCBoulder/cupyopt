@@ -1,15 +1,16 @@
-import pandas as pd
-import pysftp
 import datetime
 import logging
-import prefect
 import os
 import tempfile
-
 from typing import Any
+
+import pandas as pd
+import prefect
+import pysftp
+from box import Box
 from prefect import Task
 from prefect.utilities.tasks import defaults_from_attrs
-from box import Box
+
 
 class SFTPExists(Task):
     """
@@ -17,40 +18,61 @@ class SFTPExists(Task):
 
     Return True if found, otherwise False
     """
+
     def __init__(self, **kwargs: Any):
         super().__init__(**kwargs)
 
-    def run(self, workfile: str, config_box: Box, cnopts: pysftp.CnOpts = None, **format_kwargs: Any) -> str:
+    def run(
+        self,
+        workfile: str,
+        config_box: Box,
+        cnopts: pysftp.CnOpts = None,
+        **format_kwargs: Any
+    ) -> str:
         with prefect.context(**format_kwargs) as data:
 
-            if data.get('parameters'):
-                if data.parameters.get('cnopts'):
-                    cnopts = data.parameters['cnopts']
+            if data.get("parameters"):
+                if data.parameters.get("cnopts"):
+                    cnopts = data.parameters["cnopts"]
 
             hostname = config_box["hostname"]
             username = config_box["username"]
             remoterootpath = config_box["target_dir"]
 
             # We have to handle either a password or a key
-            if config_box.get('private_key_path'):
+            if config_box.get("private_key_path"):
                 private_key = config_box["private_key_path"]
-                if config_box.get('private_key_passphrase'):
+                if config_box.get("private_key_passphrase"):
                     # has a passphrase, use it
                     private_key_passphrase = config_box["private_key_passphrase"]
-                    sftp = pysftp.Connection(host=hostname, username=username, private_key=private_key, private_key_pass=private_key_passphrase, cnopts=cnopts)
+                    sftp = pysftp.Connection(
+                        host=hostname,
+                        username=username,
+                        private_key=private_key,
+                        private_key_pass=private_key_passphrase,
+                        cnopts=cnopts,
+                    )
                 else:
-                    sftp = pysftp.Connection(host=hostname, username=username, private_key=private_key, cnopts=cnopts)
-            elif config_box.get('password'):
+                    sftp = pysftp.Connection(
+                        host=hostname,
+                        username=username,
+                        private_key=private_key,
+                        cnopts=cnopts,
+                    )
+            elif config_box.get("password"):
                 password = config_box["password"]
-                sftp = pysftp.Connection(host=hostname, username=username, password=password, cnopts=cnopts)
+                sftp = pysftp.Connection(
+                    host=hostname, username=username, password=password, cnopts=cnopts
+                )
 
             try:
                 with sftp.cd(remoterootpath):
                     result = sftp.exists(workfile)
             finally:
                 sftp.close()
-                    
+
             return result
+
 
 class SFTPGet(Task):
     """
@@ -58,36 +80,57 @@ class SFTPGet(Task):
 
     Return a file_location_name
     """
+
     def __init__(self, **kwargs: Any):
         super().__init__(**kwargs)
 
-    def run(self, workfile: str, config_box: Box, cnopts: pysftp.CnOpts = None, tempfolderpath: str = None, **format_kwargs: Any) -> str:
+    def run(
+        self,
+        workfile: str,
+        config_box: Box,
+        cnopts: pysftp.CnOpts = None,
+        tempfolderpath: str = None,
+        **format_kwargs: Any
+    ) -> str:
         with prefect.context(**format_kwargs) as data:
 
             hostname = config_box["hostname"]
             username = config_box["username"]
             remoterootpath = config_box["target_dir"]
 
-            if data.get('parameters'):
-                if data.parameters.get('cnopts'):
-                    cnopts = data.parameters['cnopts']
-                if data.parameters.get('cache'):
-                    tempfolderpath = data.parameters['cache']
+            if data.get("parameters"):
+                if data.parameters.get("cnopts"):
+                    cnopts = data.parameters["cnopts"]
+                if data.parameters.get("cache"):
+                    tempfolderpath = data.parameters["cache"]
 
             localtmpfile = os.path.join(tempfolderpath, workfile)
             self.logger.debug("Working on ", localtmpfile)
 
-            if config_box.get('private_key_path'):
+            if config_box.get("private_key_path"):
                 private_key = config_box["private_key_path"]
-                if config_box.get('private_key_passphrase'):
+                if config_box.get("private_key_passphrase"):
                     # has a passphrase, use it
                     private_key_passphrase = config_box["private_key_passphrase"]
-                    sftp = pysftp.Connection(host=hostname, username=username, private_key=private_key, private_key_pass=private_key_passphrase, cnopts=cnopts)
+                    sftp = pysftp.Connection(
+                        host=hostname,
+                        username=username,
+                        private_key=private_key,
+                        private_key_pass=private_key_passphrase,
+                        cnopts=cnopts,
+                    )
                 else:
-                    sftp = pysftp.Connection(host=hostname, username=username, private_key=private_key, cnopts=cnopts)
-            elif config_box.get('password'):
+                    sftp = pysftp.Connection(
+                        host=hostname,
+                        username=username,
+                        private_key=private_key,
+                        cnopts=cnopts,
+                    )
+            elif config_box.get("password"):
                 password = config_box["password"]
-                sftp = pysftp.Connection(host=hostname, username=username, password=password, cnopts=cnopts)
+                sftp = pysftp.Connection(
+                    host=hostname, username=username, password=password, cnopts=cnopts
+                )
 
             try:
                 with sftp.cd(remoterootpath):
@@ -99,37 +142,59 @@ class SFTPGet(Task):
             self.logger.info("SFTPGet {}".format(localtmpfile))
             return localtmpfile
 
+
 class SFTPPut(Task):
     """
     Put a file on the FTP server
 
     Leave remotepath off, or None and the workfile and the remote file are the same.
     """
+
     def __init__(self, **kwargs: Any):
         super().__init__(**kwargs)
 
-    def run(self, workfile: str, config_box: Box, cnopts: pysftp.CnOpts = None, remotepath: str = None, **format_kwargs: Any):
+    def run(
+        self,
+        workfile: str,
+        config_box: Box,
+        cnopts: pysftp.CnOpts = None,
+        remotepath: str = None,
+        **format_kwargs: Any
+    ):
         with prefect.context(**format_kwargs) as data:
 
             hostname = config_box["hostname"]
             username = config_box["username"]
             remoterootpath = config_box["target_dir"]
 
-            if data.get('parameters'):
-                if data.parameters.get('cnopts'):
-                    cnopts = data.parameters['cnopts']
-                    
-            if config_box.get('private_key_path'):
+            if data.get("parameters"):
+                if data.parameters.get("cnopts"):
+                    cnopts = data.parameters["cnopts"]
+
+            if config_box.get("private_key_path"):
                 private_key = config_box["private_key_path"]
-                if config_box.get('private_key_passphrase'):
+                if config_box.get("private_key_passphrase"):
                     # has a passphrase, use it
                     private_key_passphrase = config_box["private_key_passphrase"]
-                    sftp = pysftp.Connection(host=hostname, username=username, private_key=private_key, private_key_pass=private_key_passphrase, cnopts=cnopts)
+                    sftp = pysftp.Connection(
+                        host=hostname,
+                        username=username,
+                        private_key=private_key,
+                        private_key_pass=private_key_passphrase,
+                        cnopts=cnopts,
+                    )
                 else:
-                    sftp = pysftp.Connection(host=hostname, username=username, private_key=private_key, cnopts=cnopts)
-            elif config_box.get('password'):
+                    sftp = pysftp.Connection(
+                        host=hostname,
+                        username=username,
+                        private_key=private_key,
+                        cnopts=cnopts,
+                    )
+            elif config_box.get("password"):
                 password = config_box["password"]
-                sftp = pysftp.Connection(host=hostname, username=username, password=password, cnopts=cnopts)
+                sftp = pysftp.Connection(
+                    host=hostname, username=username, password=password, cnopts=cnopts
+                )
 
             try:
                 if not sftp.isdir(remoterootpath):
@@ -142,14 +207,22 @@ class SFTPPut(Task):
 
             self.logger.info("SFTPPut {}".format(workfile))
 
+
 class SFTPRemove(Task):
     """
     Remove file from the FTP server
     """
+
     def __init__(self, **kwargs: Any):
         super().__init__(**kwargs)
 
-    def run(self, workfile: str, config_box: Box, cnopts: pysftp.CnOpts = None, **format_kwargs: Any):
+    def run(
+        self,
+        workfile: str,
+        config_box: Box,
+        cnopts: pysftp.CnOpts = None,
+        **format_kwargs: Any
+    ):
         with prefect.context(**format_kwargs) as data:
 
             self.logger.debug("Attempting to remove ", workfile)
@@ -158,21 +231,34 @@ class SFTPRemove(Task):
             username = config_box["username"]
             remoterootpath = config_box["target_dir"]
 
-            if data.get('parameters'):
-                if data.parameters.get('cnopts'):
-                    cnopts = data.parameters['cnopts']
+            if data.get("parameters"):
+                if data.parameters.get("cnopts"):
+                    cnopts = data.parameters["cnopts"]
 
-            if config_box.get('private_key_path'):
+            if config_box.get("private_key_path"):
                 private_key = config_box["private_key_path"]
-                if config_box.get('private_key_passphrase'):
+                if config_box.get("private_key_passphrase"):
                     # has a passphrase, use it
                     private_key_passphrase = config_box["private_key_passphrase"]
-                    sftp = pysftp.Connection(host=hostname, username=username, private_key=private_key, private_key_pass=private_key_passphrase, cnopts=cnopts)
+                    sftp = pysftp.Connection(
+                        host=hostname,
+                        username=username,
+                        private_key=private_key,
+                        private_key_pass=private_key_passphrase,
+                        cnopts=cnopts,
+                    )
                 else:
-                    sftp = pysftp.Connection(host=hostname, username=username, private_key=private_key, cnopts=cnopts)
-            elif config_box.get('password'):
+                    sftp = pysftp.Connection(
+                        host=hostname,
+                        username=username,
+                        private_key=private_key,
+                        cnopts=cnopts,
+                    )
+            elif config_box.get("password"):
                 password = config_box["password"]
-                sftp = pysftp.Connection(host=hostname, username=username, password=password, cnopts=cnopts)
+                sftp = pysftp.Connection(
+                    host=hostname, username=username, password=password, cnopts=cnopts
+                )
 
             # Pick out the oldest file in the dataframe
             try:
@@ -184,14 +270,24 @@ class SFTPRemove(Task):
             # Read the file into a dataframe
             self.logger.info("SFTPRemove {}".format(workfile))
 
+
 class SFTPRename(Task):
     """
     Rename (move) file on the FTP server
     """
+
     def __init__(self, **kwargs: Any):
         super().__init__(**kwargs)
 
-    def run(self, workfile: str, config_box: Box, source="root", target="wip", cnopts: pysftp.CnOpts = None, **format_kwargs: Any):
+    def run(
+        self,
+        workfile: str,
+        config_box: Box,
+        source="root",
+        target="wip",
+        cnopts: pysftp.CnOpts = None,
+        **format_kwargs: Any
+    ):
         with prefect.context(**format_kwargs) as data:
 
             # This moves (renames) files around on the SFTP site.
@@ -201,21 +297,34 @@ class SFTPRename(Task):
             username = config["username"]
             remoterootpath = config["target_dir"]
 
-            if data.get('parameters'):
-                if data.parameters.get('cnopts'):
-                    cnopts = data.parameters['cnopts']
+            if data.get("parameters"):
+                if data.parameters.get("cnopts"):
+                    cnopts = data.parameters["cnopts"]
 
-            if config_box.get('private_key_path'):
+            if config_box.get("private_key_path"):
                 private_key = config_box["private_key_path"]
-                if config_box.get('private_key_passphrase'):
+                if config_box.get("private_key_passphrase"):
                     # has a passphrase, use it
                     private_key_passphrase = config_box["private_key_passphrase"]
-                    sftp = pysftp.Connection(host=hostname, username=username, private_key=private_key, private_key_pass=private_key_passphrase, cnopts=cnopts)
+                    sftp = pysftp.Connection(
+                        host=hostname,
+                        username=username,
+                        private_key=private_key,
+                        private_key_pass=private_key_passphrase,
+                        cnopts=cnopts,
+                    )
                 else:
-                    sftp = pysftp.Connection(host=hostname, username=username, private_key=private_key, cnopts=cnopts)
-            elif config_box.get('password'):
+                    sftp = pysftp.Connection(
+                        host=hostname,
+                        username=username,
+                        private_key=private_key,
+                        cnopts=cnopts,
+                    )
+            elif config_box.get("password"):
                 password = config_box["password"]
-                sftp = pysftp.Connection(host=hostname, username=username, password=password, cnopts=cnopts)
+                sftp = pysftp.Connection(
+                    host=hostname, username=username, password=password, cnopts=cnopts
+                )
 
             # "root" is special
             if source == "root":
@@ -225,7 +334,8 @@ class SFTPRename(Task):
 
             remotetargetpath = os.path.join(remoterootpath, target)
             logger.debug(
-                "Moving %s from %s to %s" % (filename, remotesourcepath, remotetargetpath)
+                "Moving %s from %s to %s"
+                % (filename, remotesourcepath, remotetargetpath)
             )
 
             # Move the file from source to target on the SFTP
@@ -251,33 +361,48 @@ class SFTPRename(Task):
             finally:
                 sftp.close()
 
-class SFTPPoll(Task):
 
+class SFTPPoll(Task):
     def __init__(self, **kwargs: Any):
         super().__init__(**kwargs)
 
-    def run(self, config_box: Box, cnopts: pysftp.CnOpts = None, **format_kwargs: Any) -> pd.DataFrame:
+    def run(
+        self, config_box: Box, cnopts: pysftp.CnOpts = None, **format_kwargs: Any
+    ) -> pd.DataFrame:
         with prefect.context(**format_kwargs) as data:
 
             hostname = config_box["hostname"]
             username = config_box["username"]
             remoterootpath = config_box["target_dir"]
 
-            if data.get('parameters'):
-                if data.parameters.get('cnopts'):
-                    cnopts = data.parameters['cnopts']
+            if data.get("parameters"):
+                if data.parameters.get("cnopts"):
+                    cnopts = data.parameters["cnopts"]
 
-            if config_box.get('private_key_path'):
+            if config_box.get("private_key_path"):
                 private_key = config_box["private_key_path"]
-                if config_box.get('private_key_passphrase'):
+                if config_box.get("private_key_passphrase"):
                     # has a passphrase, use it
                     private_key_passphrase = config_box["private_key_passphrase"]
-                    sftp = pysftp.Connection(host=hostname, username=username, private_key=private_key, private_key_pass=private_key_passphrase, cnopts=cnopts)
+                    sftp = pysftp.Connection(
+                        host=hostname,
+                        username=username,
+                        private_key=private_key,
+                        private_key_pass=private_key_passphrase,
+                        cnopts=cnopts,
+                    )
                 else:
-                    sftp = pysftp.Connection(host=hostname, username=username, private_key=private_key, cnopts=cnopts)
-            elif config_box.get('password'):
+                    sftp = pysftp.Connection(
+                        host=hostname,
+                        username=username,
+                        private_key=private_key,
+                        cnopts=cnopts,
+                    )
+            elif config_box.get("password"):
                 password = config_box["password"]
-                sftp = pysftp.Connection(host=hostname, username=username, password=password, cnopts=cnopts)
+                sftp = pysftp.Connection(
+                    host=hostname, username=username, password=password, cnopts=cnopts
+                )
 
             files_data = []
 
@@ -305,14 +430,16 @@ class SFTPPoll(Task):
             filesdf = pd.DataFrame(files_data, columns=["File Name", "MTime"])
 
             self.logger.info("Found {} files to process.".format(len(filesdf.index)))
-            return filesdf  
+            return filesdf
+
 
 class DFGetOldestFile(Task):
-
     def __init__(self, **kwargs: Any):
         super().__init__(**kwargs)
 
-    def run(self, files_df: pd.DataFrame, regex_search: str, **format_kwargs: Any) -> pd.DataFrame:
+    def run(
+        self, files_df: pd.DataFrame, regex_search: str, **format_kwargs: Any
+    ) -> pd.DataFrame:
         with prefect.context(**format_kwargs) as data:
 
             """
@@ -328,7 +455,9 @@ class DFGetOldestFile(Task):
                 raise ValueError("The MTime column is missing from the dataframe.")
 
             if "File Name" not in files_df:
-                raise ValueError("The 'File Name' column is missing from the dataframe.")
+                raise ValueError(
+                    "The 'File Name' column is missing from the dataframe."
+                )
 
             if len(files_df.index) == 0:
                 self.logger.debug("The given DataFrame is empty.")

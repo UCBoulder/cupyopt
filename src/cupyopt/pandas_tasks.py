@@ -221,7 +221,7 @@ class PdColRenameAndFilter(Task):
     Returns a modified pd.Dataframe copy
     """
 
-    def __init__(self, df: pd.DataFrame=None, coldict: dict=None, **kwargs: Any):
+    def __init__(self, df: pd.DataFrame = None, coldict: dict = None, **kwargs: Any):
         self.df = df
         self.coldict = coldict
         super().__init__(**kwargs)
