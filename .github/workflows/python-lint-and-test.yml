@@ -1,0 +1,46 @@
+# This workflow will install Python dependencies, run tests and lint with matrixed versions of Python
+# For more information see: https://help.github.com/actions/language-and-framework-guides/using-python-with-github-actions
+
+name: Python Lint and Test
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: [3.8]
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: 🐍 Setup Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v2
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - name: ⚙️ Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install black pytest bandit
+        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+
+    - name: ✨ Lint with black
+      run: |
+        black . --check
+
+    - name: 🛡️ Security lint with bandit
+      # note: we exclude the tests dir using the -x flag to avoid assert test failure
+      # see: https://bandit.readthedocs.io/en/latest/plugins/b101_assert_used.html
+      run: |
+        bandit -r . -x ./tests
+
+    - name: ✅ Test with pytest
+      run: |
+        pytest

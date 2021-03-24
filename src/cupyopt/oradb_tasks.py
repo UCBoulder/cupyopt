@@ -1,24 +1,24 @@
-import pandas as pd
 import datetime
 import logging
-import prefect
 import os
 import tempfile
-import cx_Oracle
-import sqlalchemy
-
 from typing import Any
-from sqlalchemy.dialects.oracle import VARCHAR2
-from sqlalchemy import types, create_engine
+
+import cx_Oracle
+import pandas as pd
+import prefect
+import sqlalchemy
+from box import Box
 from prefect import Task
 from prefect.utilities.tasks import defaults_from_attrs
-from box import Box
+from sqlalchemy import create_engine, types
+from sqlalchemy.dialects.oracle import VARCHAR2
 
 
 class ORADBGetEngine(Task):
     """
     Configure an sqlalchemy engine with cx_Oracle
-    
+
     Return a sqlalchemy engine
     """
 
@@ -90,8 +90,8 @@ class ORADBGetEngine(Task):
 class ORADBSelectToDataFrame(Task):
     """
     Runs select statement against database using SQLAlchemy engine.
-    
-    Return a Pandas DataFrame with data collected from SQL statement. 
+
+    Return a Pandas DataFrame with data collected from SQL statement.
     """
 
     def __init__(

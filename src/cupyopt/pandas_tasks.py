@@ -15,7 +15,7 @@ from prefect.utilities.tasks import defaults_from_attrs
 class PdDataFrameFromCSV(Task):
     """
     Read CSV file into a Pandas DataFrame
-    
+
     Return a Pandas DataFrame
     """
 
@@ -36,7 +36,7 @@ class PdDataFrameFromCSV(Task):
 class PdDataFrameFromParquet(Task):
     """
     Read Parquet file into a Pandas DataFrame
-    
+
     Return a Pandas DataFrame
     """
 
@@ -57,7 +57,7 @@ class PdDataFrameFromParquet(Task):
 class PdDataFrameToCSV(Task):
     """
     Exports dataframes using temporary dicectory, DataFrame name, name suffix, and config
-    
+
     Return a filepaths for the exported Dataframe
     """
 
@@ -134,7 +134,7 @@ class PdDataFrameToCSV(Task):
 class PdDataFrameToParquet(Task):
     """
     Exports dataframe to parquet using various options
-    
+
     Return a filepaths for the exported Dataframe
     """
 
@@ -213,15 +213,15 @@ class PdColRenameAndFilter(Task):
     """
     Rename and filter Pandas Dataframe columns using python dictionary.
 
-    Column names provided in coldict follow the same format as expected by 
+    Column names provided in coldict follow the same format as expected by
     pd.DataFrame.rename(columns=dict). For example: {"current":"new", "current2":"new2"}
 
     Columns in returned dataframe are filtered by those provided to be renamed.
-    
+
     Returns a modified pd.Dataframe copy
     """
 
-    def __init__(self, df: pd.DataFrame=None, coldict: dict=None, **kwargs: Any):
+    def __init__(self, df: pd.DataFrame = None, coldict: dict = None, **kwargs: Any):
         self.df = df
         self.coldict = coldict
         super().__init__(**kwargs)

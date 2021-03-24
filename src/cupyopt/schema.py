@@ -1,16 +1,18 @@
 import json
-import pandas as pd
-import fastavro as avro
-import pandavro as pda
 from typing import Union
 
-def avro_schema(avsc: Union[dict, str]) -> dict:
+import fastavro as avro
+import pandas as pd
+import pandavro as pda
 
+
+def avro_schema(avsc: Union[dict, str]) -> dict:
     # if a dictionary type, parse from dict
-    if type(avsc) == dict:
+    if isinstance(avsc, dict):
         return avro.schema.parse_schema(avsc)
+
     # if a str type, load from file
-    elif type(avsc) == str:
+    elif isinstance(avsc, str):
         return avro.schema.load_schema(avsc)
 
 
@@ -20,7 +22,6 @@ def infer_df_avro_schema(
     namespace: str = None,
     times_as_micros: bool = True,
 ) -> dict:
-
     # infer the schema using pandavro
     schema = pda.__schema_infer(df=df, times_as_micros=times_as_micros)
 
@@ -34,8 +35,7 @@ def infer_df_avro_schema(
     return avro_schema(schema)
 
 
-def avro_schema_to_file(avsc: dict, filename: str = None, filedir: str = "./"):
-
+def avro_schema_to_file(avsc: dict, filename: str = None, filedir: str = "./") -> str:
     # infer the filename based on the avro schema name from the avro dict key:values
     if not filename:
         filename = avsc["name"]
