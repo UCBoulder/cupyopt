@@ -17,7 +17,7 @@ def test_pd_colupdate():
     coldict = {"A": "tiger"}
 
     # run task to rename and filter the dataframe
-    new_df = pd_colupdate(df=sample_df, coldict=coldict)
+    new_df = pd_colupdate(dataframe=sample_df, coldict=coldict)
 
     # test whether we have a single filtered and renamed column remaining in new df
     assert list(new_df.columns) == ["tiger"]

@@ -1,16 +1,16 @@
 """ Dataframe functions """
-import datetime
 import logging
 import os
+from tempfile import mkstemp
 
 import pandas as pd
 from box import Box
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)  # pylint: disable=C0103
 
 
 def pd_export(
-    df: pd.DataFrame,
+    dataframe: pd.DataFrame,
     export_type: str,
     df_name: str,
     temp_name: bool = False,
@@ -43,17 +43,17 @@ def pd_export(
         )
         filepath = os.path.join(dir_name, filename)
 
-    logger.info("Creating {} file {} from dataframe.".format(export_type, filepath))
+    logger.info("Creating %s file %s from dataframe.", export_type, filepath)
 
     if export_type == "parquet":
-        df.to_parquet(path=filepath, index=index)
+        dataframe.to_parquet(path=filepath, index=index)
     elif export_type == "csv":
-        df.to_csv(filepath, index=index, header=header)
+        dataframe.to_csv(filepath, index=index, header=header)
 
     return filepath
 
 
-def pd_colupdate(df: pd.DataFrame, coldict: dict) -> pd.DataFrame:
+def pd_colupdate(dataframe: pd.DataFrame, coldict: dict) -> pd.DataFrame:
     """
     Rename and filter Pandas Dataframe columns using python dictionary.
 
@@ -68,9 +68,9 @@ def pd_colupdate(df: pd.DataFrame, coldict: dict) -> pd.DataFrame:
     logger.info("Renaming and filtering dataframe columns using coldict key:values.")
 
     # Remap column names
-    df = df.rename(columns=coldict)
+    dataframe = dataframe.rename(columns=coldict)
 
     # Filter columns based on the new names
-    df = df[[val for key, val in coldict.items()]].copy()
+    dataframe = dataframe[[val for key, val in coldict.items()]].copy()
 
-    return df
+    return dataframe

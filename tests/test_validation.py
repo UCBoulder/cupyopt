@@ -26,4 +26,4 @@ AVSC_DICT = {
 
 def test_df_avro_validate():
     """ Tests validation nugget : df_avro_validate """
-    assert validation.df_avro_validate(df=DF, avsc=AVSC_DICT)
+    assert validation.df_avro_validate(dataframe=DF, avsc=AVSC_DICT)

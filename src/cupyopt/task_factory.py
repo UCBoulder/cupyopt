@@ -5,10 +5,10 @@ import prefect
 import src.cupyopt.nuggets as nuggets
 
 # prepare a placeholder class for prefect tasks created from nuggets
-ptask = lambda: None
+ptask = lambda: None  # pylint: disable=C0103
 
 # gather list of nuggets
-nuggets_list = [
+NUGGET_LIST = [
     f
     for f in dir(nuggets)
     # exclude built-ins and include only functions
@@ -16,7 +16,7 @@ nuggets_list = [
 ]
 
 # for each nugget, add it (and a parent) attr to ptask
-for nugget in nuggets_list:
+for nugget in NUGGET_LIST:
 
     # parent attr for task
     parent = getattr(nuggets, nugget).__module__[20:]
@@ -24,9 +24,7 @@ for nugget in nuggets_list:
     # if no parent attr attached to ptask, set it
     if not hasattr(ptask, parent):
         setattr(
-            ptask,
-            parent,
-            lambda: None,
+            ptask, parent, lambda: None,
         )
 
     # set attr per parent attr within ptask

@@ -39,7 +39,7 @@ def test_avro_schema(tmpdir):
 def test_infer_df_avro_schema():
     """ Tests schema nugget: infer_df_avro_schema """
     # infer the avro schema from dataframe
-    avsc = schema.infer_df_avro_schema(df=DF, name="dataframe", namespace="test")
+    avsc = schema.infer_df_avro_schema(dataframe=DF, name="dataframe", namespace="test")
 
     assert avsc["type"] == "record"
     assert avsc["name"] == "test.dataframe"
@@ -50,7 +50,7 @@ def test_infer_df_avro_schema():
 def test_avro_schema_to_file(tmpdir):
     """ Tests schema nugget: avro_schema_to_file """
     # infer the avro schema from dataframe
-    avsc = schema.infer_df_avro_schema(df=DF, name="dataframe", namespace="test")
+    avsc = schema.infer_df_avro_schema(dataframe=DF, name="dataframe", namespace="test")
 
     # avsc to file
     filepath = schema.avro_schema_to_file(
