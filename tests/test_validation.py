@@ -6,7 +6,7 @@ import pytest
 sys.path.append(os.getcwd())
 
 import pandas as pd
-import src.cupyopt.validation as validation
+import src.cupyopt.nuggets.validation as validation
 
 # create a test dataframe
 df = pd.DataFrame(

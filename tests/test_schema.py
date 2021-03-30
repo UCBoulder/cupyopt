@@ -6,7 +6,7 @@ import pytest
 sys.path.append(os.getcwd())
 
 import pandas as pd
-import src.cupyopt.schema as schema
+import src.cupyopt.nuggets.schema as schema
 
 # create a test dataframe
 df = pd.DataFrame(
