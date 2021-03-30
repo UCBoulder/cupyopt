@@ -1,13 +1,19 @@
+""" Schema functions """
 import json
 from typing import Union
+import logging
 
 import fastavro as avro
 import pandas as pd
 import pandavro as pda
 
+logger = logging.getLogger(__name__)
+
 
 def avro_schema(avsc: Union[dict, str]) -> dict:
+    """ Create avro schema from dictionary or filepath string """
     # if a dictionary type, parse from dict
+    logging.info("Parsing avro schema")
     if isinstance(avsc, dict):
         return avro.schema.parse_schema(avsc)
 
@@ -22,6 +28,8 @@ def infer_df_avro_schema(
     namespace: str = None,
     times_as_micros: bool = True,
 ) -> dict:
+    """ Infer avro schema from pandas dataframe """
+    logging.info("Inferring avro schema from dataframe")
     # infer the schema using pandavro
     schema = pda.__schema_infer(df=df, times_as_micros=times_as_micros)
 
@@ -36,6 +44,8 @@ def infer_df_avro_schema(
 
 
 def avro_schema_to_file(avsc: dict, filename: str = None, filedir: str = "./") -> str:
+    """ Export avro schema to file """
+    logging.info("Exporting avro schema to file")
     # infer the filename based on the avro schema name from the avro dict key:values
     if not filename:
         filename = avsc["name"]
@@ -50,7 +60,7 @@ def avro_schema_to_file(avsc: dict, filename: str = None, filedir: str = "./") -
 
     filepath = "{}{}.avsc".format(filedir, filename)
 
-    with open(filepath, "w") as f:
-        f.write(json.dumps(_avsc, indent=4))
+    with open(filepath, "w") as avro_file:
+        avro_file.write(json.dumps(_avsc, indent=4))
 
     return filepath

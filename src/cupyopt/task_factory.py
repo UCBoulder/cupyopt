@@ -1,5 +1,5 @@
 """ Factory for creating tasks from nuggets """
-from collections import Callable
+from collections.abc import Callable
 
 import prefect
 import src.cupyopt.nuggets as nuggets

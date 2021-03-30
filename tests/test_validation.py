@@ -1,7 +1,6 @@
+""" Tests validation nuggets """
 import os
 import sys
-
-import pytest
 
 sys.path.append(os.getcwd())
 
@@ -9,14 +8,14 @@ import pandas as pd
 import src.cupyopt.nuggets.validation as validation
 
 # create a test dataframe
-df = pd.DataFrame(
+DF = pd.DataFrame(
     {"A": [1, 2, 3], "B": [4.4, 5.5, 6.6], "C": ["Lions", "Tigers", "Pandas"]}
 )
 
 # create a test avro schema dict
-avsc_dict = {
+AVSC_DICT = {
     "type": "record",
-    "name": "test",
+    "name": "validation_test",
     "fields": [
         {"name": "A", "type": ["null", "long"]},
         {"name": "B", "type": ["null", "double"]},
@@ -26,4 +25,5 @@ avsc_dict = {
 
 
 def test_df_avro_validate():
-    assert validation.df_avro_validate(df=df, avsc=avsc_dict)
+    """ Tests validation nugget : df_avro_validate """
+    assert validation.df_avro_validate(df=DF, avsc=AVSC_DICT)
