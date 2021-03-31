@@ -6,6 +6,7 @@ sys.path.append(os.getcwd())
 
 import pandas as pd
 import src.cupyopt.nuggets.validation as validation
+import src.cupyopt.nuggets.schema as schema
 
 # create a test dataframe
 DF = pd.DataFrame(
@@ -27,3 +28,10 @@ AVSC_DICT = {
 def test_df_avro_validate():
     """ Tests validation nugget : df_avro_validate """
     assert validation.df_avro_validate(dataframe=DF, avsc=AVSC_DICT)
+
+
+def test_df_arrow_validate():
+    """ Tests validation nugget : df_arrow_validate """
+    arsc = schema.infer_df_arrow_schema(dataframe=DF)
+
+    assert validation.df_arrow_validate(dataframe=DF, arsc=arsc)
