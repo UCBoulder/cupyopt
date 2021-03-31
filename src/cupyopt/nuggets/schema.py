@@ -7,6 +7,7 @@ import fastavro as avro
 import pandas as pd
 import pandavro as pda
 import pyarrow as pa
+import pyarrow.parquet as pq
 
 logger = logging.getLogger(__name__)  # pylint: disable=C0103
 
@@ -29,15 +30,21 @@ def arrow_schema_to_parquet(
     filepath = "{}/{}.schema.parquet".format(filedir, filename)
 
     # write schema into empty table parquet file
-    pa.parquet.write_table(table=arsc.empty_table(), where=filepath)
+    pq.write_table(table=arsc.empty_table(), where=filepath)
 
     return filepath
 
 
-def arrow_schema_from_parquet(filepath: str = None) -> pa.lib.Schema:
+def arrow_schema_from_parquet(source: Union[pa.lib.Table, str]) -> pa.lib.Schema:
     """ Import arrow schema from parquet file """
-    logging.info("Importing arrow schema from parquet file")
-    return pa.parquet.read_table(source=filepath).schema
+    logging.info("Importing arrow schema from parquet")
+    if isinstance(source, pa.lib.Table):
+        schema = source.schema
+
+    elif isinstance(source, str):
+        schema = pq.read_table(source=source).schema
+
+    return schema
 
 
 def avro_schema(avsc: Union[dict, str]) -> dict:
@@ -63,7 +70,7 @@ def infer_df_avro_schema(
     """ Infer avro schema from pandas dataframe """
     logging.info("Inferring avro schema from dataframe")
     # infer the schema using pandavro
-    schema = pda.schema_infer(dataframe=dataframe, times_as_micros=times_as_micros)
+    schema = pda.schema_infer(df=dataframe, times_as_micros=times_as_micros)
 
     # add custom schema name if exists (by default "Root")
     if name:

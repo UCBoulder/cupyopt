@@ -1,11 +1,13 @@
 """ Tests schema nuggets """
 import os
 import sys
+import json
 
 sys.path.append(os.getcwd())
 
-import json
 import pandas as pd
+import pyarrow as pa
+import pyarrow.parquet as pq
 import src.cupyopt.nuggets.schema as schema
 
 # create a test dataframe
@@ -60,3 +62,22 @@ def test_avro_schema_to_file(tmpdir):
     assert os.path.isfile(filepath)
     assert filepath.lower().endswith("avsc")
     assert isinstance(schema.avro_schema(avsc=filepath), dict)
+
+
+def test_arrow_schema(tmpdir):
+    """ Tests schema nugget: arrow schema functions """
+    # infer the avro schema from dataframe
+    arsc = schema.infer_df_arrow_schema(dataframe=DF)
+
+    # arsc to file
+    filepath = schema.arrow_schema_to_parquet(
+        arsc=arsc, filename="sample", filedir=tmpdir
+    )
+
+    assert os.path.isfile(filepath)
+    assert filepath.lower().endswith(".schema.parquet")
+    assert isinstance(schema.arrow_schema_from_parquet(source=filepath), pa.lib.Schema)
+    assert isinstance(
+        schema.arrow_schema_from_parquet(source=pq.read_table(source=filepath)),
+        pa.lib.Schema,
+    )
