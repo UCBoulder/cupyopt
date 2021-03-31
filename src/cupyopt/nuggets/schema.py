@@ -11,20 +11,6 @@ import pyarrow as pa
 logger = logging.getLogger(__name__)  # pylint: disable=C0103
 
 
-def avro_schema(avsc: Union[dict, str]) -> dict:
-    """ Create avro schema from dictionary or filepath string """
-    # if a dictionary type, parse from dict
-    logging.info("Parsing avro schema")
-    if isinstance(avsc, dict):
-        avsc = avro.schema.parse_schema(avsc)
-
-    # if a str type, load from file
-    elif isinstance(avsc, str):
-        avsc = avro.schema.load_schema(avsc)
-
-    return avsc
-
-
 def infer_df_arrow_schema(dataframe: pd.DataFrame) -> pa.lib.Schema:
     """ Infer arrow schema from pandas dataframe """
     logging.info("Inferring arrow schema from dataframe")
@@ -46,6 +32,20 @@ def arrow_schema_to_file(
         arrow_file.write(arsc.to_string())
 
     return filepath
+
+
+def avro_schema(avsc: Union[dict, str]) -> dict:
+    """ Create avro schema from dictionary or filepath string """
+    # if a dictionary type, parse from dict
+    logging.info("Parsing avro schema")
+    if isinstance(avsc, dict):
+        avsc = avro.schema.parse_schema(avsc)
+
+    # if a str type, load from file
+    elif isinstance(avsc, str):
+        avsc = avro.schema.load_schema(avsc)
+
+    return avsc
 
 
 def infer_df_avro_schema(
