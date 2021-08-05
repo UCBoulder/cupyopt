@@ -3,10 +3,8 @@ pandas>=1.1.1
 pysftp
 pygrok
 prefect==0.13.12
-sqlalchemy
-cx_Oracle
+SQLAlchemy==1.4.6
 pyarrow
-sqlalchemy
 cx_Oracle
 fastavro==1.0.0.post1
 pandavro==1.5.2
