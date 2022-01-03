@@ -25,22 +25,14 @@ jobs:
       with:
         python-version: ${{ matrix.python-version }}
 
-    - name: ⚙️ Install dependencies
+    - name: ⚙️ Install
       run: |
-        python -m pip install --upgrade pip
-        pip install black pytest bandit
-        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+        make install
 
-    - name: ✨ Lint with black
+    - name: ✨ Lint
       run: |
-        black . --check
+        make lint
 
-    - name: 🛡️ Security lint with bandit
-      # note: we exclude the tests dir using the -x flag to avoid assert test failure
-      # see: https://bandit.readthedocs.io/en/latest/plugins/b101_assert_used.html
+    - name: ✅ Test
       run: |
-        bandit -r . -x ./tests
-
-    - name: ✅ Test with pytest
-      run: |
-        pytest
+        make test

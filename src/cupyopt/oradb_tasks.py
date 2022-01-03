@@ -1,18 +1,16 @@
-import datetime
-import logging
+""" oracle database related Prefect tasks """
+
 import os
-import tempfile
 from typing import Any
 
-import cx_Oracle
 import pandas as pd
-import prefect
 import sqlalchemy
 from box import Box
 from prefect import Task
 from prefect.utilities.tasks import defaults_from_attrs
-from sqlalchemy import create_engine, types
-from sqlalchemy.dialects.oracle import VARCHAR2
+from sqlalchemy import create_engine
+
+# pylint: disable=arguments-differ
 
 
 class ORADBGetEngine(Task):
@@ -28,63 +26,58 @@ class ORADBGetEngine(Task):
         super().__init__(**kwargs)
 
     @defaults_from_attrs("config_box", "is_sid")
-    def run(
-        self, config_box: Box = None, is_sid: bool = None, **format_kwargs: Any
-    ) -> str:
-        with prefect.context(**format_kwargs) as data:
+    def run(self, config_box: Box = None, is_sid: bool = None) -> str:
 
-            if not type(config_box) == Box:
-                raise ValueError("The configuration object must be a Box")
+        if not isinstance(config_box, Box):
+            raise ValueError("The configuration object must be a Box")
 
-            # This will help encoding since most of our dbs are UTF8
-            os.environ["NLS_LANG"] = ".AL32UTF8"
+        # This will help encoding since most of our dbs are UTF8
+        os.environ["NLS_LANG"] = ".AL32UTF8"
 
-            self.logger.info(
-                "Creating DB engine for {}@{}".format(
-                    config_box["database"], config_box["hostname"]
-                )
-            )
+        self.logger.info(
+            "Creating DB engine for %s@%s",
+            config_box["database"],
+            config_box["hostname"],
+        )
 
-            if config_box.port:
-                port = config_box["port"]
-            else:
-                port = "1521"
+        if config_box.port:
+            port = config_box["port"]
+        else:
+            port = "1521"
 
-            if is_sid:
-                database = config_box["database"]
-            else:
-                database = "?service_name={}".format(config_box["database"])
+        if is_sid:
+            database = config_box["database"]
+        else:
+            database = f'?service_name={config_box["database"]}'
 
-            if config_box.get("proxy_username"):
-                username = "{}[{}]".format(
-                    config_box["username"], config_box["proxy_username"]
-                )
-            else:
-                username = config_box["username"]
+        if config_box.get("proxy_username"):
+            username = f'{config_box["username"]}[{config_box["proxy_username"]}]'
+        else:
+            username = config_box["username"]
 
-            # oracle connection string which will have values replaced based on credentials provided from above json file
-            oracle_connection_string = (
-                "oracle+cx_oracle://{username}:{password}@{hostname}:{port}/{database}"
-            )
+        # oracle connection string which will have
+        # values replaced based on credentials provided from above json file
+        oracle_connection_string = (
+            "oracle+cx_oracle://{username}:{password}@{hostname}:{port}/{database}"
+        )
 
-            oracle_connection_string = oracle_connection_string.format(
-                username=username,
-                password=config_box["password"],
-                hostname=config_box["hostname"],
-                port=port,
-                database=database,
-            )
+        oracle_connection_string = oracle_connection_string.format(
+            username=username,
+            password=config_box["password"],
+            hostname=config_box["hostname"],
+            port=port,
+            database=database,
+        )
 
-            # create the database connection engine using sqlalchemy library and formated oracle_connection_string
-            # I've found that our SID instances can't support identifiers longer than 128.
-            if is_sid:
-                engine = create_engine(
-                    oracle_connection_string, max_identifier_length=128
-                )
-            else:
-                engine = create_engine(oracle_connection_string)
+        # create the database connection engine using sqlalchemy library and
+        # formated oracle_connection_string. Local SID instances can't support
+        # identifiers longer than 128.
+        if is_sid:
+            engine = create_engine(oracle_connection_string, max_identifier_length=128)
+        else:
+            engine = create_engine(oracle_connection_string)
 
-            return engine
+        return engine
 
 
 class ORADBSelectToDataFrame(Task):
@@ -98,7 +91,7 @@ class ORADBSelectToDataFrame(Task):
         self,
         select_stmt: str = None,
         engine: sqlalchemy.engine.base.Engine = None,
-        **kwargs: Any
+        **kwargs: Any,
     ):
         self.select_stmt = select_stmt
         self.engine = engine
@@ -109,15 +102,12 @@ class ORADBSelectToDataFrame(Task):
         self,
         select_stmt: str = None,
         engine: sqlalchemy.engine.base.Engine = None,
-        **format_kwargs: Any
     ) -> pd.DataFrame:
 
-        with prefect.context(**format_kwargs) as data:
+        self.logger.info(
+            "Running select statement using SQLAlchemy engine to Pandas DataFrame."
+        )
 
-            self.logger.info(
-                "Running select statement using SQLAlchemy engine to Pandas DataFrame."
-            )
+        dataframe = pd.read_sql(sql=select_stmt, con=engine)
 
-            df = pd.read_sql(sql=select_stmt, con=engine)
-
-        return df
+        return dataframe
