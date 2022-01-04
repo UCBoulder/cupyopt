@@ -6,9 +6,16 @@ format:
 	python -m black src
 
 lint:
-	pylint src --extension-pkg-whitelist=pyarrow &&\
-	black src --check &&\
+	pylint src tests --extension-pkg-whitelist=pyarrow &&\
+	black src tests --check &&\
+	yamllint src tests &&\
 	bandit -r src -x ./tests -s B104
 
 test:
 	pytest
+
+venv-install:
+	python -m venv venv
+
+venv-activate:
+	. venv/bin/activate && exec bash
