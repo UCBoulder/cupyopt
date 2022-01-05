@@ -8,4 +8,10 @@ from .sftp_tasks import (
     SFTPPut,
     SFTPRemove,
 )
+from .objectstore_tasks import (
+    Objstr_client,
+    Objstr_make_bucket,
+    Objstr_fput,
+    Objstr_fget,
+)
 from .task_factory import ptask

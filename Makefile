@@ -12,7 +12,7 @@ lint:
 	bandit -r src -x ./tests -s B104
 
 test:
-	pytest
+	pytest -o log_cli=true
 
 venv-install:
 	python -m venv venv
