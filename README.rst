@@ -5,16 +5,11 @@ A package of `Prefect <https://github.com/PrefectHQ/prefect>`_ Tasks and helpers
 
 Minimum Python 3.6
 
-Tasks provided:
+The following task 'families' are included:
 
-SFTP Tasks:
-- SFTPGet
-- SFTPRemove
-- SFTPPoll
-- DFGetOldestFile
-
-ORADB Tasks:
-- ORADBGetEngine
+* SFTP Tasks
+* ORADB (Oracle Database) Tasks
+* Object Storage Tasks
 
 Installation
 ------------
@@ -31,17 +26,18 @@ NB, The 'x.y.z' (e.g. 0.12.6) in the versioning matches the versioning in Prefec
 Use
 ---
 
-Import the Task you need similar to,
+Import the Task you need similar to:
 
-from cupyopt import SFTPGet, ORADBGetEngine
+from cupyopt.objectstore_tasks import ObjstrClient
 
-Tests
------
+Tests and Linting
+-----------------
 
 ::
 
-	pip install pytest
-	pytest tests
+	make install
+	make lint
+	make test
 
 Contributing?
 -------------
