@@ -9,9 +9,11 @@ from .sftp_tasks import (
     SFTPRemove,
 )
 from .objectstore_tasks import (
-    Objstr_client,
-    Objstr_make_bucket,
-    Objstr_fput,
-    Objstr_fget,
+    ObjstrClient,
+    ObjstrMakeBucket,
+    ObjstrGet,
+    ObjstrPut,
+    ObjstrFPut,
+    ObjstrFGet,
 )
 from .task_factory import ptask

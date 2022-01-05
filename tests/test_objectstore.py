@@ -6,23 +6,32 @@ import tempfile
 import pytest
 import urllib3
 from box import Box
-from cupyopt.objectstore_tasks import (
-    Objstr_client,
-    Objstr_fput,
-    Objstr_make_bucket,
-    Objstr_fget,
-)
 from minio import Minio
+from cupyopt.objectstore_tasks import (
+    ObjstrClient,
+    ObjstrFGet,
+    ObjstrFPut,
+    ObjstrGet,
+    ObjstrMakeBucket,
+    ObjstrPut,
+)
 
 logger = logging.getLogger(__name__)
-test_config = Box({"endpoint": "test", "key": "testkey", "secret": "testsecret"})
 
 
-@pytest.fixture
-def objstr_client():
+@pytest.fixture(name="objstr_config")
+def fixture_objstr_config():
+    """fixture config for testing"""
+    test_config = Box({"endpoint": "test", "key": "testkey", "secret": "testsecret"})
+
+    return test_config
+
+
+@pytest.fixture(name="objstr_client")
+def fixture_objstr_client(objstr_config):
     """fixture client for testing"""
-    client = Objstr_client().run(
-        config_box=test_config,
+    client = ObjstrClient().run(
+        config_box=objstr_config,
         http_client=urllib3.PoolManager(
             timeout=1,
             retries=urllib3.Retry(
@@ -43,17 +52,48 @@ def test_client(objstr_client):
 def test_make_bucket(objstr_client):
     """test make bucket"""
     with pytest.raises(urllib3.exceptions.MaxRetryError):
-        Objstr_make_bucket().run(
+        ObjstrMakeBucket().run(
             client=objstr_client,
             bucket_name="bucket",
         )
+
+
+def test_get(objstr_client):
+    """test get"""
+    with pytest.raises(urllib3.exceptions.MaxRetryError):
+        ObjstrGet().run(
+            client=objstr_client,
+            bucket_name="bucket",
+            object_name="object",
+        )
+
+
+def test_put(objstr_client):
+    """test put"""
+    with pytest.raises(AttributeError):
+        ObjstrPut().run(
+            client=objstr_client,
+            bucket_name="bucket",
+            object_name="object",
+            data="some data",
+        )
+
+    with pytest.raises(urllib3.exceptions.MaxRetryError):
+        with tempfile.NamedTemporaryFile() as temp_file:
+            with open(temp_file.name, "r", encoding="utf-8") as open_data:
+                ObjstrPut().run(
+                    client=objstr_client,
+                    bucket_name="bucket",
+                    object_name="object",
+                    data=open_data,
+                )
 
 
 def test_fput(objstr_client):
     """test fput"""
     with pytest.raises(urllib3.exceptions.MaxRetryError):
         with tempfile.NamedTemporaryFile() as temp_file:
-            Objstr_fput().run(
+            ObjstrFPut().run(
                 client=objstr_client,
                 bucket_name="bucket",
                 object_name="object",
@@ -64,7 +104,7 @@ def test_fput(objstr_client):
 def test_fget(objstr_client):
     """test fget"""
     with pytest.raises(urllib3.exceptions.MaxRetryError):
-        Objstr_fget().run(
+        ObjstrFGet().run(
             client=objstr_client,
             bucket_name="bucket",
             object_name="object",

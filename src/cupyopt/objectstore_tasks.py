@@ -3,15 +3,16 @@
 import logging
 from typing import Any
 
+import urllib3
 from box import Box
 from minio import Minio
-from box import Box
 from prefect import Task
 from prefect.utilities.tasks import defaults_from_attrs
-import urllib3
+
+# pylint: disable=arguments-differ, too-many-arguments
 
 
-class Objstr_client(Task):
+class ObjstrClient(Task):
     """setup object storage client via minio"""
 
     def __init__(
@@ -43,16 +44,17 @@ class Objstr_client(Task):
         return client
 
 
-class Objstr_make_bucket(Task):
+class ObjstrMakeBucket(Task):
     """attempts to make a bucket if not already available"""
 
-    def __init__(self, bucket_name: str = None, client: Minio = None, **kwargs: Any):
-        self.bucket_name = bucket_name
+    def __init__(self, client: Minio = None, bucket_name: str = None, **kwargs: Any):
         self.client = client
+        self.bucket_name = bucket_name
+
         super().__init__(**kwargs)
 
-    @defaults_from_attrs("bucket_name", "client")
-    def run(self, bucket_name: str, client: Minio):
+    @defaults_from_attrs("client", "bucket_name")
+    def run(self, client: Minio, bucket_name: str):
 
         # make bucket if not exists
         if not client.bucket_exists(bucket_name):
@@ -62,56 +64,81 @@ class Objstr_make_bucket(Task):
             logging.info("Bucket %s already exists, taking no actions.", bucket_name)
 
 
-class Objstr_put(Task):
+class ObjstrPut(Task):
     """put data as object in object store"""
 
     def __init__(
         self,
+        client: Minio = None,
         bucket_name: str = None,
         object_name: str = None,
         data: object = None,
-        client: Minio = None,
+        length: int = -1,
+        part_size: int = 5 * 1024 * 1024,
         **kwargs: Any
     ):
 
+        self.client = client
         self.bucket_name = bucket_name
         self.object_name = object_name
         self.data = data
-        self.client = client
+        self.length = length
+        self.part_size = part_size
+
         super().__init__(**kwargs)
 
-    @defaults_from_attrs("bucket_name", "object_name", "data", "client")
-    def run(self, bucket_name: str, object_name: str, data: object, client: Minio):
+    @defaults_from_attrs(
+        "bucket_name", "object_name", "data", "length", "part_size", "client"
+    )
+    def run(
+        self,
+        client: Minio,
+        bucket_name: str,
+        object_name: str,
+        data: object,
+        length: int = None,
+        part_size: int = None,
+    ):
+        if not length:
+            length = self.length
+
+        if not part_size:
+            part_size = self.part_size
 
         # upload file as object
         client.put_object(
             bucket_name=bucket_name,
             object_name=object_name,
             data=data,
+            length=length,
+            part_size=part_size,
         )
 
         logging.info("Put data under %s as %s", bucket_name, object_name)
 
 
-class Objstr_get(Task):
+class ObjstrGet(Task):
     """get object as data from object store"""
 
     def __init__(
         self,
+        client: Minio = None,
         bucket_name: str = None,
         object_name: str = None,
-        client: Minio = None,
         **kwargs: Any
     ):
+        self.client = client
         self.bucket_name = bucket_name
         self.object_name = object_name
-        self.client = client
+
         super().__init__(**kwargs)
 
-    @defaults_from_attrs("bucket_name", "object_name", "client")
-    def run(
-        self, bucket_name: str, object_name: str, file_path: str, client: Minio
-    ) -> Any:
+    @defaults_from_attrs(
+        "client",
+        "bucket_name",
+        "object_name",
+    )
+    def run(self, client: Minio, bucket_name: str, object_name: str) -> Any:
 
         # get object as file
         data = client.get_object(
@@ -127,26 +154,33 @@ class Objstr_get(Task):
         return data
 
 
-class Objstr_fput(Task):
+class ObjstrFPut(Task):
     """put file as object in object store"""
 
     def __init__(
         self,
+        client: Minio = None,
         bucket_name: str = None,
         object_name: str = None,
         file_path: str = None,
-        client: Minio = None,
         **kwargs: Any
     ):
 
+        self.client = client
         self.bucket_name = bucket_name
         self.object_name = object_name
         self.file_path = file_path
-        self.client = client
+
         super().__init__(**kwargs)
 
-    @defaults_from_attrs("bucket_name", "object_name", "file_path", "client")
-    def run(self, bucket_name: str, object_name: str, file_path: str, client: Minio):
+    @defaults_from_attrs("client", "bucket_name", "object_name", "file_path")
+    def run(
+        self,
+        client: Minio,
+        bucket_name: str,
+        object_name: str,
+        file_path: str,
+    ):
 
         # upload file as object
         client.fput_object(
@@ -158,26 +192,26 @@ class Objstr_fput(Task):
         logging.info("Put file %s under %s as %s", file_path, bucket_name, object_name)
 
 
-class Objstr_fget(Task):
+class ObjstrFGet(Task):
     """get object as file from object store"""
 
     def __init__(
         self,
+        client: Minio = None,
         bucket_name: str = None,
         object_name: str = None,
         file_path: str = None,
-        client: Minio = None,
         **kwargs: Any
     ):
-
+        self.client = client
         self.bucket_name = bucket_name
         self.object_name = object_name
         self.file_path = file_path
-        self.client = client
+
         super().__init__(**kwargs)
 
-    @defaults_from_attrs("bucket_name", "object_name", "file_path", "client")
-    def run(self, bucket_name: str, object_name: str, file_path: str, client: Minio):
+    @defaults_from_attrs("client", "bucket_name", "object_name", "file_path")
+    def run(self, client: Minio, bucket_name: str, object_name: str, file_path: str):
 
         # get object as file
         client.fget_object(
