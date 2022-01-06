@@ -1,14 +1,11 @@
 """ Tests schema nuggets """
-import os
-import sys
 import json
-
-sys.path.append(os.getcwd())
+import os
 
 import pandas as pd
 import pyarrow as pa
 import pyarrow.parquet as pq
-import src.cupyopt.nuggets.schema as schema
+from cupyopt.nuggets import schema
 
 # create a test dataframe
 DF = pd.DataFrame(
@@ -28,10 +25,10 @@ AVSC_DICT = {
 
 
 def test_avro_schema(tmpdir):
-    """ Tests schema nugget: avro_shema w tmpdir"""
+    """Tests schema nugget: avro_shema w tmpdir"""
     # create a sample file from the sample avro schema dict
-    avsc_filepath = "{}/example.avsc".format(tmpdir)
-    with open(avsc_filepath, "w") as avro_file:
+    avsc_filepath = f"{tmpdir}/example.avsc"
+    with open(avsc_filepath, "w", encoding="utf-8") as avro_file:
         avro_file.write(json.dumps(AVSC_DICT))
 
     assert isinstance(schema.avro_schema(avsc=AVSC_DICT), dict)
@@ -39,7 +36,7 @@ def test_avro_schema(tmpdir):
 
 
 def test_infer_df_avro_schema():
-    """ Tests schema nugget: infer_df_avro_schema """
+    """Tests schema nugget: infer_df_avro_schema"""
     # infer the avro schema from dataframe
     avsc = schema.infer_df_avro_schema(dataframe=DF, name="dataframe", namespace="test")
 
@@ -50,7 +47,7 @@ def test_infer_df_avro_schema():
 
 
 def test_avro_schema_to_file(tmpdir):
-    """ Tests schema nugget: avro_schema_to_file """
+    """Tests schema nugget: avro_schema_to_file"""
     # infer the avro schema from dataframe
     avsc = schema.infer_df_avro_schema(dataframe=DF, name="dataframe", namespace="test")
 
@@ -65,7 +62,7 @@ def test_avro_schema_to_file(tmpdir):
 
 
 def test_arrow_schema(tmpdir):
-    """ Tests schema nugget: arrow schema functions """
+    """Tests schema nugget: arrow schema functions"""
     # infer the avro schema from dataframe
     arsc = schema.infer_df_arrow_schema(dataframe=DF)
 

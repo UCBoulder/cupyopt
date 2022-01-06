@@ -2,7 +2,7 @@
 from collections.abc import Callable
 
 import prefect
-import src.cupyopt.nuggets as nuggets
+from . import nuggets
 
 # prepare a placeholder class for prefect tasks created from nuggets
 ptask = lambda: None  # pylint: disable=C0103
@@ -24,7 +24,9 @@ for nugget in NUGGET_LIST:
     # if no parent attr attached to ptask, set it
     if not hasattr(ptask, parent):
         setattr(
-            ptask, parent, lambda: None,
+            ptask,
+            parent,
+            lambda: None,
         )
 
     # set attr per parent attr within ptask

@@ -1,15 +1,11 @@
 """ Tests dataframe nuggets """
-import os
-import sys
-
-sys.path.append(os.getcwd())
 
 import pandas as pd
-from src.cupyopt.nuggets.dataframe import pd_colupdate
+from cupyopt.nuggets.dataframe import pd_colupdate
 
 
 def test_pd_colupdate():
-    """ Tests dataframe nugget: pd_colupdate """
+    """Tests dataframe nugget: pd_colupdate"""
     # create a test dataframe
     sample_df = pd.DataFrame({"A": [1, 2, 3], "B": [4, 5, 6]})
 

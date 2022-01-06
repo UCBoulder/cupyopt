@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)  # pylint: disable=C0103
 
 
 def infer_df_arrow_schema(dataframe: pd.DataFrame) -> pa.lib.Schema:
-    """ Infer arrow schema from pandas dataframe """
+    """Infer arrow schema from pandas dataframe"""
     logging.info("Inferring arrow schema from dataframe")
     # infer the schema using pyarrow
     arsc = pa.Schema.from_pandas(df=dataframe)
@@ -24,10 +24,10 @@ def infer_df_arrow_schema(dataframe: pd.DataFrame) -> pa.lib.Schema:
 def arrow_schema_to_parquet(
     arsc: pa.lib.Schema, filename: str, filedir: str = "."
 ) -> str:
-    """ Export arrow schema to parquet file """
+    """Export arrow schema to parquet file"""
     logging.info("Exporting arrow schema to parquet file")
 
-    filepath = "{}/{}.schema.parquet".format(filedir, filename)
+    filepath = f"{filedir}/{filename}.schema.parquet"
 
     # write schema into empty table parquet file
     pq.write_table(table=arsc.empty_table(), where=filepath)
@@ -36,7 +36,7 @@ def arrow_schema_to_parquet(
 
 
 def arrow_schema_from_parquet(source: Union[pa.lib.Table, str]) -> pa.lib.Schema:
-    """ Import arrow schema from parquet file """
+    """Import arrow schema from parquet file"""
     logging.info("Importing arrow schema from parquet")
     if isinstance(source, pa.lib.Table):
         schema = source.schema
@@ -48,7 +48,7 @@ def arrow_schema_from_parquet(source: Union[pa.lib.Table, str]) -> pa.lib.Schema
 
 
 def avro_schema(avsc: Union[dict, str]) -> dict:
-    """ Create avro schema from dictionary or filepath string """
+    """Create avro schema from dictionary or filepath string"""
     # if a dictionary type, parse from dict
     logging.info("Parsing avro schema")
     if isinstance(avsc, dict):
@@ -67,7 +67,7 @@ def infer_df_avro_schema(
     namespace: str = None,
     times_as_micros: bool = True,
 ) -> dict:
-    """ Infer avro schema from pandas dataframe """
+    """Infer avro schema from pandas dataframe"""
     logging.info("Inferring avro schema from dataframe")
     # infer the schema using pandavro
     schema = pda.schema_infer(df=dataframe, times_as_micros=times_as_micros)
@@ -83,7 +83,7 @@ def infer_df_avro_schema(
 
 
 def avro_schema_to_file(avsc: dict, filename: str = None, filedir: str = ".") -> str:
-    """ Export avro schema to file """
+    """Export avro schema to file"""
     logging.info("Exporting avro schema to file")
     # infer the filename based on the avro schema name from the avro dict key:values
     if not filename:
@@ -97,9 +97,9 @@ def avro_schema_to_file(avsc: dict, filename: str = None, filedir: str = ".") ->
         if key in _avsc.keys():
             _avsc.pop(key)
 
-    filepath = "{}/{}.avsc".format(filedir, filename)
+    filepath = f"{filedir}/{filename}.avsc"
 
-    with open(filepath, "w") as avro_file:
+    with open(filepath, "w", encoding="utf-8") as avro_file:
         avro_file.write(json.dumps(_avsc, indent=4))
 
     return filepath

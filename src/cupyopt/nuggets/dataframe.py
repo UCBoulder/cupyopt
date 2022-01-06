@@ -6,6 +6,8 @@ from tempfile import mkstemp
 import pandas as pd
 from box import Box
 
+# pylint: disable=too-many-arguments
+
 logger = logging.getLogger(__name__)  # pylint: disable=C0103
 
 
@@ -35,12 +37,10 @@ def pd_export(
     elif config_box and dir_name == "":
         filepath = os.path.join(
             config_box.extracttempdir,
-            "{}{}{}.{}".format(df_name_prefix, df_name, df_name_suffix, export_type),
+            f"{df_name_prefix}{df_name}{df_name_suffix}.{export_type}",
         )
     else:
-        filename = "{}{}{}.{}".format(
-            df_name_prefix, df_name, df_name_suffix, export_type
-        )
+        filename = f"{df_name_prefix}{df_name}{df_name_suffix}.{export_type}"
         filepath = os.path.join(dir_name, filename)
 
     logger.info("Creating %s file %s from dataframe.", export_type, filepath)
