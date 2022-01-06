@@ -12,6 +12,7 @@ from cupyopt.objectstore_tasks import (
     ObjstrFGet,
     ObjstrFPut,
     ObjstrGet,
+    ObjstrGetAsDF,
     ObjstrMakeBucket,
     ObjstrPut,
 )
@@ -65,6 +66,17 @@ def test_get(objstr_client):
             client=objstr_client,
             bucket_name="bucket",
             object_name="object",
+        )
+
+
+def test_get_as_df(objstr_client):
+    """test get"""
+    with pytest.raises(urllib3.exceptions.MaxRetryError):
+        ObjstrGetAsDF().run(
+            client=objstr_client,
+            bucket_name="bucket",
+            object_name="object",
+            dftype="csv",
         )
 
 

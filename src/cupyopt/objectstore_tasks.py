@@ -1,8 +1,9 @@
 """ object store functions """
 
 import logging
-from typing import Any
+from typing import Any, Literal
 
+import pandas as pd
 import urllib3
 from box import Box
 from minio import Minio
@@ -152,6 +153,54 @@ class ObjstrGet(Task):
             bucket_name,
         )
         return data
+
+
+class ObjstrGetAsDF(Task):
+    """get object and return as pandas.dataframe from object store"""
+
+    def __init__(
+        self,
+        client: Minio = None,
+        bucket_name: str = None,
+        object_name: str = None,
+        dftype: Literal["csv", "parquet", "excel"] = None,
+        **kwargs: Any
+    ):
+        self.client = client
+        self.bucket_name = bucket_name
+        self.object_name = object_name
+        self.dftype = dftype
+
+        super().__init__(**kwargs)
+
+    @defaults_from_attrs("client", "bucket_name", "object_name", "dftype")
+    def run(
+        self,
+        client: Minio,
+        bucket_name: str,
+        object_name: str,
+        dftype: Literal["csv", "parquet", "excel"],
+        **kwargs: Any
+    ) -> Any:
+
+        # get object as file
+        data = client.get_object(
+            bucket_name=bucket_name,
+            object_name=object_name,
+        )
+
+        logging.info(
+            "Retrieved object %s under %s",
+            object_name,
+            bucket_name,
+        )
+
+        if dftype == "csv":
+            pd_dataframe = pd.read_csv(filepath_or_buffer=data, **kwargs)
+        elif dftype == "parquet":
+            pd_dataframe = pd.read_parquet(filepath_or_buffer=data, **kwargs)
+
+        return pd_dataframe
 
 
 class ObjstrFPut(Task):
