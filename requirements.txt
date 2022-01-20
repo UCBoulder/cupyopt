@@ -13,4 +13,5 @@ pylint
 pysftp
 pytest
 sqlalchemy
+typing_extensions
 yamllint
