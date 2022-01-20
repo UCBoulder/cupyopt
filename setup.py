@@ -20,7 +20,7 @@ if os.path.isfile(REQUIREMENT_PATH):
 # This call to setup() does all the work
 setuptools.setup(
     name="cupyopt",
-    version="0.15.11.1",
+    version="0.15.11.2",
     description="CU Python Opinionated Prefect Tasks",
     long_description=README,
     long_description_content_type="text/x-rst",
