@@ -1,7 +1,8 @@
 """ object store functions """
 
 import logging
-from typing import Any, Literal
+from typing import Any
+from typing_extensions import Literal
 
 import pandas as pd
 import urllib3
