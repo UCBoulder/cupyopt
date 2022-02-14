@@ -266,7 +266,9 @@ class ObjstrFGet(Task):
         super().__init__(**kwargs)
 
     @defaults_from_attrs("client", "bucket_name", "object_name", "file_path")
-    def run(self, client: Minio, bucket_name: str, object_name: str, file_path: str):
+    def run(
+        self, client: Minio, bucket_name: str, object_name: str, file_path: str
+    ) -> str:
 
         # get object as file
         client.fget_object(
@@ -281,3 +283,5 @@ class ObjstrFGet(Task):
             bucket_name,
             file_path,
         )
+
+        return file_path
