@@ -1,6 +1,7 @@
 """ object store functions """
 
 import logging
+import os
 from typing import Any
 from typing_extensions import Literal
 
@@ -211,26 +212,30 @@ class ObjstrFPut(Task):
         self,
         client: Minio = None,
         bucket_name: str = None,
-        object_name: str = None,
         file_path: str = None,
+        object_name: str = None,
         **kwargs: Any
     ):
 
         self.client = client
         self.bucket_name = bucket_name
-        self.object_name = object_name
         self.file_path = file_path
+        self.object_name = object_name
 
         super().__init__(**kwargs)
 
-    @defaults_from_attrs("client", "bucket_name", "object_name", "file_path")
+    @defaults_from_attrs("client", "bucket_name", "file_path", "object_name")
     def run(
         self,
         client: Minio,
         bucket_name: str,
-        object_name: str,
         file_path: str,
+        object_name: str = None,
     ):
+
+        # if no object_name is provided, default to file_path basename
+        if not object_name:
+            object_name = os.path.basename(file_path)
 
         # upload file as object
         client.fput_object(
@@ -261,7 +266,9 @@ class ObjstrFGet(Task):
         super().__init__(**kwargs)
 
     @defaults_from_attrs("client", "bucket_name", "object_name", "file_path")
-    def run(self, client: Minio, bucket_name: str, object_name: str, file_path: str):
+    def run(
+        self, client: Minio, bucket_name: str, object_name: str, file_path: str
+    ) -> str:
 
         # get object as file
         client.fget_object(
@@ -276,3 +283,5 @@ class ObjstrFGet(Task):
             bucket_name,
             file_path,
         )
+
+        return file_path
