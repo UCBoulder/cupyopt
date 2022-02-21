@@ -100,7 +100,7 @@ class SFTPGet(Task):
                     tempfolderpath = data.parameters["cache"]
 
             localtmpfile = os.path.join(tempfolderpath, workfile)
-            self.logger.debug("Working on {}", os.path.join(tempfolderpath, workfile))
+            self.logger.debug("Working on %s", os.path.join(tempfolderpath, workfile))
 
             if config_box.get("private_key_path"):
                 private_key = config_box["private_key_path"]
@@ -136,7 +136,7 @@ class SFTPGet(Task):
             finally:
                 sftp.close()
 
-            self.logger.info("SFTPGet {}", localtmpfile)
+            self.logger.info("SFTPGet %s", localtmpfile)
 
             return localtmpfile
 
@@ -202,7 +202,7 @@ class SFTPPut(Task):
             finally:
                 sftp.close()
 
-            self.logger.info("SFTPPut {}", workfile)
+            self.logger.info("SFTPPut %s", workfile)
 
 
 class SFTPRemove(Task):
@@ -222,7 +222,7 @@ class SFTPRemove(Task):
     ):
         with prefect.context(**format_kwargs) as data:
 
-            self.logger.debug("Attempting to remove ", workfile)
+            self.logger.debug("Attempting to remove %s", workfile)
 
             if data.get("parameters"):
                 if data.parameters.get("cnopts"):
@@ -264,7 +264,7 @@ class SFTPRemove(Task):
                 sftp.close()
 
             # Read the file into a dataframe
-            self.logger.info("SFTPRemove {}", workfile)
+            self.logger.info("SFTPRemove %s", workfile)
 
 
 class SFTPRename(Task):
@@ -330,7 +330,7 @@ class SFTPRename(Task):
             filename = os.path.basename(remotesourcepath)
 
             self.logger.debug(
-                "Moving {} from {} to {}", filename, remotesourcepath, remotetargetpath
+                "Moving %s from %s to %s", filename, remotesourcepath, remotetargetpath
             )
 
             # Move the file from source to target on the SFTP
@@ -341,7 +341,7 @@ class SFTPRename(Task):
                         # Working in notebooks you might have already
                         # moved the file in another block
                         self.logger.warning(
-                            "The file {} isn't in the remote folder.",
+                            "The file %s isn't in the remote folder.",
                             os.path.join(remotesourcepath, filename),
                         )
                     else:
@@ -429,7 +429,7 @@ class SFTPPoll(Task):
 
             files_df = pd.DataFrame(files_data, columns=["File Name", "MTime"])
 
-            self.logger.info("Found {} files to process.", len(files_df.index))
+            self.logger.info("Found %s files to process.", len(files_df.index))
             return files_df
 
 
@@ -467,5 +467,5 @@ class DFGetOldestFile(Task):
 
         # Fetch the oldest file from the frame and bring it to a local temp file.
         workfile = files_df.iloc[0]["File Name"]
-        self.logger.info("Found oldest file, {}", workfile)
+        self.logger.info("Found oldest file, %s", workfile)
         return workfile
