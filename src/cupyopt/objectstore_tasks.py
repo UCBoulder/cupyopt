@@ -1,6 +1,5 @@
 """ object store functions """
 
-import logging
 import os
 from typing import Any
 from typing_extensions import Literal
@@ -33,7 +32,7 @@ class ObjstrClient(Task):
         self, config_box: Box, http_client: urllib3.poolmanager.PoolManager = None
     ) -> Minio:
 
-        logging.info(
+        self.logger.info(
             "Creating object store client for endpoint %s.", config_box.endpoint
         )
         client = Minio(
@@ -62,9 +61,11 @@ class ObjstrMakeBucket(Task):
         # make bucket if not exists
         if not client.bucket_exists(bucket_name):
             client.make_bucket(bucket_name)
-            logging.info("Created bucket %s", bucket_name)
+            self.logger.info("Created bucket %s", bucket_name)
         else:
-            logging.info("Bucket %s already exists, taking no actions.", bucket_name)
+            self.logger.info(
+                "Bucket %s already exists, taking no actions.", bucket_name
+            )
 
 
 class ObjstrPut(Task):
@@ -117,7 +118,7 @@ class ObjstrPut(Task):
             part_size=part_size,
         )
 
-        logging.info("Put data under %s as %s", bucket_name, object_name)
+        self.logger.info("Put data under %s as %s", bucket_name, object_name)
 
 
 class ObjstrGet(Task):
@@ -149,7 +150,7 @@ class ObjstrGet(Task):
             object_name=object_name,
         )
 
-        logging.info(
+        self.logger.info(
             "Retrieved object %s under %s",
             object_name,
             bucket_name,
@@ -191,7 +192,7 @@ class ObjstrGetAsDF(Task):
             object_name=object_name,
         )
 
-        logging.info(
+        self.logger.info(
             "Retrieved object %s under %s",
             object_name,
             bucket_name,
@@ -244,7 +245,9 @@ class ObjstrFPut(Task):
             file_path=file_path,
         )
 
-        logging.info("Put file %s under %s as %s", file_path, bucket_name, object_name)
+        self.logger.info(
+            "Put file %s under %s as %s", file_path, bucket_name, object_name
+        )
 
 
 class ObjstrFGet(Task):
@@ -277,7 +280,7 @@ class ObjstrFGet(Task):
             file_path=file_path,
         )
 
-        logging.info(
+        self.logger.info(
             "Retrieved object %s under %s as file %s",
             object_name,
             bucket_name,
