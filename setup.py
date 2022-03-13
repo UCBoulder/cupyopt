@@ -20,7 +20,7 @@ if os.path.isfile(REQUIREMENT_PATH):
 # This call to setup() does all the work
 setuptools.setup(
     name="cupyopt",
-    version="0.15.13.2",
+    version="1.1.0.1",
     description="CU Python Opinionated Prefect Tasks",
     long_description=README,
     long_description_content_type="text/x-rst",
@@ -32,7 +32,7 @@ setuptools.setup(
         "Operating System :: OS Independent",
     ],
     packages=setuptools.find_packages(where="src"),
-    python_requires=">=3.6",
+    python_requires=">=3.8",
     package_dir={"": "src"},
     install_requires=INSTALL_REQUIRES,
 )
