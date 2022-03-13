@@ -1,4 +1,5 @@
 """ Init for cupyopt base """
+from .dataframe_tasks import DFExport, DFColumnUpdate
 from .objectstore_tasks import (
     ObjstrClient,
     ObjstrFGet,
@@ -17,4 +18,13 @@ from .sftp_tasks import (
     SFTPPut,
     SFTPRemove,
 )
-from .task_factory import ptask
+from .schema_tasks import (
+    DFInferArrowSchema,
+    ArrowSchemaToParquet,
+    ArrowSchemaFromParquet,
+    AvroSchema,
+    DFInferAvroSchema,
+    AvroSchemaToFile,
+    DFValidateSchemaArrow,
+    DFValidateSchemaAvro,
+)
