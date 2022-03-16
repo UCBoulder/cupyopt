@@ -66,6 +66,7 @@ class ObjstrMakeBucket(Task):
             self.logger.info(
                 "Bucket %s already exists, taking no actions.", bucket_name
             )
+        return bucket_name
 
 
 class ObjstrPut(Task):
@@ -119,6 +120,8 @@ class ObjstrPut(Task):
         )
 
         self.logger.info("Put data under %s as %s", bucket_name, object_name)
+
+        return object_name
 
 
 class ObjstrGet(Task):
@@ -248,6 +251,8 @@ class ObjstrFPut(Task):
         self.logger.info(
             "Put file %s under %s as %s", file_path, bucket_name, object_name
         )
+
+        return object_name
 
 
 class ObjstrFGet(Task):

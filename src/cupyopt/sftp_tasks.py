@@ -204,6 +204,8 @@ class SFTPPut(Task):
 
             self.logger.info("SFTPPut %s", workfile)
 
+            return workfile
+
 
 class SFTPRemove(Task):
     """
@@ -265,6 +267,8 @@ class SFTPRemove(Task):
 
             # Read the file into a dataframe
             self.logger.info("SFTPRemove %s", workfile)
+
+            return workfile
 
 
 class SFTPRename(Task):
@@ -357,6 +361,8 @@ class SFTPRename(Task):
             finally:
                 sftp.close()
 
+            return target
+
 
 class SFTPPoll(Task):
     """
@@ -430,6 +436,7 @@ class SFTPPoll(Task):
             files_df = pd.DataFrame(files_data, columns=["File Name", "MTime"])
 
             self.logger.info("Found %s files to process.", len(files_df.index))
+
             return files_df
 
 
